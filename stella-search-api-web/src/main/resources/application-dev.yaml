@@ -1,0 +1,31 @@
+spring:
+    datasource:
+        druid:
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            url: jdbc:mysql://localhost:3306/stella_search?useUnicode=true&characterEncoding=utf8
+            username: DinoStark
+            password: non-feeling
+    redis:
+        host: localhost
+#        port: 6379
+        port: 10079
+    cloud:
+        nacos:
+            discovery:
+#                server-addr: localhost:8848
+                server-addr: localhost:13848
+
+dataworks:
+    easy-minio:
+#        endpoint: http://localhost:9000
+        endpoint: http://localhost:10074
+        access-key: minioadmin
+        secret-key: minioadmin
+        bucket-name-images: stella-images
+        bucket-name-videos: stella-videos
+
+images:
+    avatar-url-prefix: http://localhost:${server.port}/avatar/
+
+stella-search:
+    jwt-secret: q4~@x2uC$f@M2x*^e5&DB^L!3~)6@+

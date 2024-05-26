@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stark.stellasearch.dao.AccountBaseInfoMapper">
+    <resultMap id="BaseResultMap" type="stark.stellasearch.domain.AccountBaseInfo">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="phone_number" jdbcType="VARCHAR" property="phoneNumber"/>
+        <result column="encrypted_password" jdbcType="VARCHAR" property="encryptedPassword"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="nickname" jdbcType="VARCHAR" property="nickname"/>
+        <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="phone_number_prefix" jdbcType="VARCHAR" property="phoneNumberPrefix"/>
+        <result column="gender" jdbcType="VARCHAR" property="gender"/>
+        <result column="state" jdbcType="INTEGER" property="state"/>
+        <result column="creation_time" jdbcType="TIMESTAMP" property="creationTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <select id="getAccountByUsername" resultMap="BaseResultMap">
+        SELECT id,
+               phone_number,
+               encrypted_password,
+               username,
+               nickname,
+               avatar_url,
+               email,
+               phone_number_prefix,
+               gender,
+               state,
+               creation_time,
+               update_time
+        FROM account_base_info
+        WHERE username = #{username}
+    </select>
+
+    <update id="updatePasswordByUsername">
+        UPDATE account_base_info
+        SET encrypted_password = #{encryptedPassword}
+        WHERE username = #{username}
+    </update>
+
+    <select id="getByUsernamePhoneNumberEmail" resultMap="BaseResultMap">
+        SELECT username, phone_number, phone_number_prefix, email
+        FROM account_base_info
+        WHERE username = #{username}
+        OR (phone_number = #{phoneNumber} AND phone_number_prefix = #{phoneNumberPrefix})
+        OR email = #{email}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO account_base_info
+        (`phone_number`, `encrypted_password`, `username`, `nickname`, `avatar_url`, `email`, `phone_number_prefix`, `gender`)
+        VALUES
+        (#{phoneNumber}, #{encryptedPassword}, #{username}, #{nickname}, #{avatarUrl}, #{email}, #{phoneNumberPrefix}, #{gender})
+    </insert>
+</mapper>

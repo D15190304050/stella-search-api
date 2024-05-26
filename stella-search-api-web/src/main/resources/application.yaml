@@ -1,0 +1,29 @@
+server:
+    port: 19332
+
+spring:
+    profiles:
+        active: dev
+    application:
+        name: stella-search
+    jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+        default-property-inclusion: ALWAYS
+    cloud:
+        nacos:
+            discovery:
+                enabled: true
+                register-enabled: true
+
+mybatis:
+    mapper-locations:
+        - classpath:mappers/*.xml
+
+slice-byte-count: 5242880 # Maximum number of bytes in a chunk, could be changed in future version.
+
+logging:
+    pattern:
+        console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%thread]){faint} %clr(%-40.40logger{39}){cyan} %L %clr(:){faint} %m%n"
+    level:
+        root: INFO
