@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import stark.dataworks.basic.data.json.JsonSerializer;
-import stark.dataworks.basic.data.redis.RedisQuickOperation;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.results.LoginStateToken;
 import stark.stellasearch.service.JwtService;
@@ -19,7 +18,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -29,16 +27,13 @@ public class LoginSuccessJsonHandler implements AuthenticationSuccessHandler
     private JwtService jwtService;
 
     @Autowired
-    private RedisQuickOperation redisQuickOperation;
-
-    @Autowired
     private StellaRedisOperation redisOperation;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException
     {
         User user = (User) authentication.getPrincipal();
-        cacheAuthentication(user, response);
+        cacheAuthentication(user);
         writeAuthenticationToken(request, response, user);
     }
 
@@ -69,15 +64,10 @@ public class LoginSuccessJsonHandler implements AuthenticationSuccessHandler
     }
 
     // TODO: Move this method to another class after integration of other login methods.
-    private void cacheAuthentication(User user, HttpServletResponse response)
+    private void cacheAuthentication(User user)
     {
         // Cache user info.
         redisOperation.cacheUser(user);
-
-        // Cache user id.
-        long userId = user.getId();
-        String userIdKey = UUID.randomUUID().toString();
-        redisQuickOperation.set(userIdKey, "" + userId);
     }
 
     private LoginStateToken generateLoginStateToken(User user)

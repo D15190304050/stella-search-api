@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stark.stellasearch.dao.VideoUploadingTaskMapper">
+    <resultMap type="stark.stellasearch.domain.VideoUploadingTask" id="VideoUploadingTaskResultMap">
+        <id property="id" column="id"/>
+        <result property="taskId" column="task_id"/>
+        <result property="state" column="state"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO `video_uploading_task`
+        (`task_id`, `state`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`)
+        VALUES
+        (
+            #{taskId},
+            #{state},
+            #{creatorId},
+            #{creationTime},
+            #{modifierId},
+            #{modificationTime}
+        )
+    </insert>
+</mapper>

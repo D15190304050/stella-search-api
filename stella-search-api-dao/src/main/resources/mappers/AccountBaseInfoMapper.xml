@@ -17,38 +17,38 @@
     </resultMap>
 
     <select id="getAccountByUsername" resultMap="BaseResultMap">
-        SELECT id,
-               phone_number,
-               encrypted_password,
-               username,
-               nickname,
-               avatar_url,
-               email,
-               phone_number_prefix,
-               gender,
-               state,
-               creation_time,
-               update_time
-        FROM account_base_info
-        WHERE username = #{username}
+        SELECT `id`,
+               `phone_number`,
+               `encrypted_password`,
+               `username`,
+               `nickname`,
+               `avatar_url`,
+               `email`,
+               `phone_number_prefix`,
+               `gender`,
+               `state`,
+               `creation_time`,
+               `update_time`
+        FROM `account_base_info`
+        WHERE `username` = #{username}
     </select>
 
     <update id="updatePasswordByUsername">
-        UPDATE account_base_info
-        SET encrypted_password = #{encryptedPassword}
-        WHERE username = #{username}
+        UPDATE `account_base_info`
+        SET `encrypted_password` = #{encryptedPassword}
+        WHERE `username` = #{username}
     </update>
 
     <select id="getByUsernamePhoneNumberEmail" resultMap="BaseResultMap">
-        SELECT username, phone_number, phone_number_prefix, email
-        FROM account_base_info
-        WHERE username = #{username}
-        OR (phone_number = #{phoneNumber} AND phone_number_prefix = #{phoneNumberPrefix})
-        OR email = #{email}
+        SELECT `username`, `phone_number`, `phone_number_prefix`, `email`
+        FROM `account_base_info`
+        WHERE `username` = #{username}
+        OR (`phone_number` = #{phoneNumber} AND `phone_number_prefix` = #{phoneNumberPrefix})
+        OR `email` = #{email}
     </select>
 
     <insert id="insert">
-        INSERT INTO account_base_info
+        INSERT INTO `account_base_info`
         (`phone_number`, `encrypted_password`, `username`, `nickname`, `avatar_url`, `email`, `phone_number_prefix`, `gender`)
         VALUES
         (#{phoneNumber}, #{encryptedPassword}, #{username}, #{nickname}, #{avatarUrl}, #{email}, #{phoneNumberPrefix}, #{gender})

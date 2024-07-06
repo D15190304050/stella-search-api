@@ -8,9 +8,9 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class NewVideoUploadingTaskRequest
 {
-    @NotBlank(message = "Video name must not be blank.")
-    private String videoName;
-
     @Min(value = 1, message = "Number of video chunks must be >= 1.")
     private long videoChunkCount;
+
+    @NotBlank(message = "File extension of the video must be provided.")
+    private String videoFileExtension;
 }

@@ -39,7 +39,7 @@ public class CaptchaService
         ImageIO.write(captchaImage, "jpg", outputStream);
         String captchaBytes = "data:image/jpeg;base64," + Base64Utils.encodeToString(outputStream.toByteArray());
 
-        String captchaId = UUID.randomUUID().toString();
+        String captchaId = "Captcha-" + UUID.randomUUID().toString();
         redisQuickOperation.set(captchaId, captchaText, 5, TimeUnit.MINUTES);
 
         log.info("Captcha text = {}", captchaText);
