@@ -3,13 +3,16 @@ package stark.stellasearch.service;
 import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import stark.dataworks.basic.data.redis.RedisQuickOperation;
 import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
+import stark.stellasearch.dto.params.ClearOldUploadingTaskRequest;
 import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
 import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
 import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
@@ -45,6 +48,10 @@ public class VideoService
 
     @Autowired
     private EasyMinio easyMinio;
+
+    @Autowired
+    @Qualifier("lowPriorityTaskExecutor")
+    private ThreadPoolTaskExecutor lowPriorityTaskExecutor;
 
     private String generateTaskId(long userId)
     {
@@ -105,18 +112,12 @@ public class VideoService
         String chunkNamePrefix = taskId + "-";
         String chunkName = chunkNamePrefix + videoChunkIndex;
 
-        log.info("Uploading video chunk index = {}", request.getVideoChunkIndex());
-        log.info("Uploading video chunk file name = {}", request.getVideoChunk().getOriginalFilename());
-        log.info("Uploading video chunk name = {}", request.getVideoChunk().getName());
-//        return ServiceResponse.buildSuccessResponse(true);
-
         // Steps:
         // 1. Check if the chunk is uploaded. If it is, return success.
         // 2. Upload the chunk if it was not uploaded.
         // 2.1 Upload it to MinIO.
         // 2.2 Add it to redis state set.
         // 2.3 Reset the expiration time of the redis set.
-        // 3. If all the chunks are uploaded, compose them, and delete the set.
 
         // Step 1.
         if (redisQuickOperation.setContains(taskId, "" + videoChunkIndex))
@@ -192,9 +193,7 @@ public class VideoService
         }
 
         // Remove the keys in the redis once uploading finished.
-        redisQuickOperation.delete(taskId);
-        redisQuickOperation.delete(chunkCountKey);
-        redisQuickOperation.delete(videoFileExtensionKey);
+        clearUploadingTask(taskId);
 
         // Remove chunks in MinIO (compose operation will only create a new object without any changes on existing objects.)
         easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
@@ -205,5 +204,31 @@ public class VideoService
     private void resetExpirationOfUploadingTask(String taskId)
     {
         redisQuickOperation.expire(taskId, 30, TimeUnit.MINUTES);
+    }
+
+    public ServiceResponse<Boolean> clearOldUploadingTask(@Valid ClearOldUploadingTaskRequest request)
+    {
+        String taskId = request.getVideoUploadingTaskId();
+
+        lowPriorityTaskExecutor.execute(() -> clearUploadingTask(taskId));
+
+        return ServiceResponse.buildSuccessResponse(true);
+    }
+
+    /**
+     * Clear the resources of the video uploading task, which will not be used again.
+     * The resources contain keys in redis, a record in database, and chunks in MinIO.
+     * @param taskId
+     */
+    private void clearUploadingTask(String taskId)
+    {
+        // TODO: Clear the database record.
+
+        String chunkCountKey = generateTaskChunkCountKey(taskId);
+        String videoFileExtensionKey = taskId + VIDEO_FILE_EXTENSION;
+
+        redisQuickOperation.delete(taskId);
+        redisQuickOperation.delete(chunkCountKey);
+        redisQuickOperation.delete(videoFileExtensionKey);
     }
 }

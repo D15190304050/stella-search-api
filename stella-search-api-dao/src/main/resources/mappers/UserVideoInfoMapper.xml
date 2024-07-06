@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stark.stellasearch.dao.UserVideoInfoMapper">
+    <resultMap id="UserVideoInfoResultMap" type="stark.stellasearch.domain.UserVideoInfo">
+        <id property="id" column="id"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="title" column="title"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="creationType" column="creation_type"/>
+        <result property="sectionId" column="section_id"/>
+        <result property="labels" column="labels"/>
+        <result property="introduction" column="introduction"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+</mapper>

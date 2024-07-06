@@ -18,6 +18,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>stark.stellasearch</groupId>
             <artifactId>stella-search-api-service</artifactId>
             <version>${project.version}</version>

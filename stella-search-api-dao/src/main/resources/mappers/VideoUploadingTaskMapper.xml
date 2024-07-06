@@ -24,4 +24,10 @@
             #{modificationTime}
         )
     </insert>
+
+    <update id="setStateById">
+        UPDATE `video_uploading_task`
+        SET `state` = #{state}
+        WHERE `task_id` = #{taskId}
+    </update>
 </mapper>
