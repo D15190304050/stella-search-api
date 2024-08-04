@@ -8,9 +8,10 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
 import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
 import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
+import stark.stellasearch.dto.results.VideoUploadingOption;
 import stark.stellasearch.service.VideoService;
+import stark.stellasearch.service.VideoUploadingOptionHolder;
 
-import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +22,9 @@ public class VideoController
 {
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private VideoUploadingOptionHolder videoUploadingOptionHolder;
 
     @GetMapping("/generate-task")
     public ServiceResponse<String> generateNewVideoUploadingTask(@ModelAttribute NewVideoUploadingTaskRequest request)
@@ -39,5 +43,11 @@ public class VideoController
     public ServiceResponse<Boolean> composeVideoChunks(@RequestBody ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         return videoService.composeVideoChunks(request);
+    }
+
+    @GetMapping("/uploading-options")
+    public ServiceResponse<VideoUploadingOption> getVideoUploadingOptions()
+    {
+        return videoUploadingOptionHolder.getVideoUploadingOptions();
     }
 }

@@ -45,7 +45,7 @@ CREATE TABLE `video_uploading_task`
 DROP TABLE IF EXISTS `user_video_info`;
 CREATE TABLE `user_video_info`
 (
-    `id`                BIGINT                                                 NOT NULL COMMENT 'ID of the video.',
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video.',
     `video_url`         VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'URL of the video.',
     `title`             VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Title of the video.',
     `cover_url`         VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'URL of the cover of the video.',
@@ -57,9 +57,73 @@ CREATE TABLE `user_video_info`
     `creation_time`     DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
     `modifier_id`       BIGINT                                                 NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
     `modification_time` DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.',
-    PRIMARY KEY (`id`)
+    KEY `idx_creator_id` (`creator_id`),
+    KEY `idx_section_id` (`section_id`)
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin
     COMMENT = 'Information of user uploaded videos.';
+
+DROP TABLE IF EXISTS `video_creation_type`;
+CREATE TABLE `video_creation_type`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video creation type.',
+    `type`              VARCHAR(20) NOT NULL COMMENT 'Video creation type: 0 - Original; 1 - Reprinting.',
+    `creator_id`        BIGINT      NOT NULL COMMENT 'ID of the user who uploads the video.',
+    `creation_time`     DATETIME    NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
+    `modifier_id`       BIGINT      NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
+    `modification_time` DATETIME    NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.'
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Video creation types.';
+
+INSERT INTO `video_creation_type`
+    (`type`, `creator_id`, `modifier_id`)
+VALUES ('Original', 1, 1),
+       ('Reprinting', 1, 1);
+
+DROP TABLE IF EXISTS `video_section`;
+CREATE TABLE `video_section`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video creation type.',
+    `section`           VARCHAR(200) NOT NULL COMMENT 'Section of the video: 0 - None; 1 - Games; 2 - Action; 3 - Animation.',
+    `creator_id`        BIGINT       NOT NULL COMMENT 'ID of the user who uploads the video.',
+    `creation_time`     DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
+    `modifier_id`       BIGINT       NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
+    `modification_time` DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.'
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Video sections.';
+
+INSERT INTO `video_section`
+    (`section`, `creator_id`, `modifier_id`)
+VALUES ('None', 1, 1),
+       ('Games', 1, 1),
+       ('Action', 1, 1),
+       ('Animation', 1, 1);
+
+DROP TABLE IF EXISTS `video_label`;
+CREATE TABLE `video_label`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video creation type.',
+    `label`             VARCHAR(100) NOT NULL COMMENT 'The label.',
+    `creator_id`        BIGINT       NOT NULL COMMENT 'ID of the user who uploads the video.',
+    `creation_time`     DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
+    `modifier_id`       BIGINT       NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
+    `modification_time` DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.'
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Video labels.';
+
+INSERT INTO `video_label`
+    (`label`, `creator_id`, `modifier_id`)
+VALUES ('Games', 1, 1),
+       ('Action', 1, 1),
+       ('Animation', 1, 1);

@@ -23,6 +23,7 @@ dataworks:
         secret-key: minioadmin
         bucket-name-images: stella-images
         bucket-name-videos: stella-videos
+        bucket-name-video-covers: stella-video-covers
 
 images:
     avatar-url-prefix: http://localhost:${server.port}/avatar/

@@ -12,7 +12,6 @@ import stark.dataworks.basic.data.redis.RedisQuickOperation;
 import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.dto.params.ClearOldUploadingTaskRequest;
 import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
 import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
 import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
@@ -42,6 +41,9 @@ public class VideoService
 
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
+
+    @Value("${dataworks.easy-minio.bucket-name-video-covers}")
+    private String bucketNameVideoCovers;
 
     @Autowired
     private RedisQuickOperation redisQuickOperation;
@@ -111,6 +113,9 @@ public class VideoService
 
         String chunkNamePrefix = taskId + "-";
         String chunkName = chunkNamePrefix + videoChunkIndex;
+
+        // TODO: Adjustment of uploading state.
+        // 1. If the chunkSize % 10 == 0 or uploading ends, write uploaded chunk ids to database, in case Redis is down.
 
         // Steps:
         // 1. Check if the chunk is uploaded. If it is, return success.
@@ -206,15 +211,6 @@ public class VideoService
         redisQuickOperation.expire(taskId, 30, TimeUnit.MINUTES);
     }
 
-    public ServiceResponse<Boolean> clearOldUploadingTask(@Valid ClearOldUploadingTaskRequest request)
-    {
-        String taskId = request.getVideoUploadingTaskId();
-
-        lowPriorityTaskExecutor.execute(() -> clearUploadingTask(taskId));
-
-        return ServiceResponse.buildSuccessResponse(true);
-    }
-
     /**
      * Clear the resources of the video uploading task, which will not be used again.
      * The resources contain keys in redis, a record in database, and chunks in MinIO.
@@ -231,4 +227,6 @@ public class VideoService
         redisQuickOperation.delete(chunkCountKey);
         redisQuickOperation.delete(videoFileExtensionKey);
     }
+
+//    private ServiceResponse<List<>>
 }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stark.stellasearch.dao.VideoUploadingOptionMapper">
+    <resultMap id="VideoCreationTypeResultMap" type="stark.stellasearch.domain.VideoCreationType">
+        <id property="id" column="id" />
+        <result property="type" column="type" />
+        <result property="creatorId" column="creator_id" />
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id" />
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <resultMap id="VideoLabelResultMap" type="stark.stellasearch.domain.VideoLabel">
+        <id property="id" column="id" />
+        <result property="label" column="label" />
+        <result property="creatorId" column="creator_id" />
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id" />
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <resultMap id="VideoSectionResultMap" type="stark.stellasearch.domain.VideoSection">
+        <id property="id" column="id" />
+        <result property="section" column="section" />
+        <result property="creatorId" column="creator_id" />
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id" />
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <select id="getAllVideoCreationTypes" resultMap="VideoCreationTypeResultMap">
+        SELECT `id`, `type` FROM `video_creation_type`
+    </select>
+
+    <select id="getAllVideoLabels" resultMap="VideoLabelResultMap">
+        SELECT `id`, `label` FROM `video_label`
+    </select>
+
+    <select id="getAllVideoSections" resultMap="VideoSectionResultMap">
+        SELECT `id`, `section` FROM `video_section`
+    </select>
+</mapper>
