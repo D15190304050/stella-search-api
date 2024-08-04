@@ -21,7 +21,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @LogArgumentsAndResponse
-public class AvatarService
+public class ImageService
 {
     public static final List<String> ACCEPTABLE_IMAGE_FILE_SUFFIXES;
     public static final String ACCEPTABLE_IMAGE_FILE_SUFFIX_TEXT;
@@ -31,6 +31,9 @@ public class AvatarService
 
     @Value("${images.avatar-url-prefix}")
     private String avatarUrlPrefix;
+
+    @Value("${images.video-cover-prefix}")
+    private String videoCoverUrlPrefix;
 
     @Autowired
     private EasyMinio easyMinio;
@@ -49,38 +52,10 @@ public class AvatarService
 
     public ServiceResponse<String> uploadAvatar(MultipartFile avatarFile)
     {
-        if (avatarFile == null)
-            return ServiceResponse.buildErrorResponse(-3, "Argument null.");
-
-        String originalFilename = avatarFile.getOriginalFilename();
-
-        if (originalFilename == null)
-            return ServiceResponse.buildErrorResponse(-4, "Original file name is null.");
-
-        int lastIndexOfDot = originalFilename.lastIndexOf(".");
-        String fileSuffix = originalFilename.substring(lastIndexOfDot);
-
-        if (!ACCEPTABLE_IMAGE_FILE_SUFFIXES.contains(fileSuffix))
-            return ServiceResponse.buildErrorResponse(-5, String.format("Unacceptable image suffix: %s, acceptable file formats are: %s.", fileSuffix, ACCEPTABLE_IMAGE_FILE_SUFFIX_TEXT));
-
-        String avatarFileName = UUID.randomUUID().toString();
-        avatarFileName += fileSuffix;
-
-        try
-        {
-            easyMinio.uploadFileByStream(bucketNameImages, avatarFileName, avatarFile.getInputStream());
-        }
-        catch (Exception e)
-        {
-            ExceptionLogger.logExceptionInfo(e);
-            return ServiceResponse.buildErrorResponse(-1, "Upload failure, see log for more information.");
-        }
-
-        String avatarUrl = avatarUrlPrefix + avatarFileName;
-        return ServiceResponse.buildSuccessResponse(avatarUrl);
+        return uploadImage(avatarFile, avatarUrlPrefix);
     }
 
-    public void getAvatar(String avatarFileName, HttpServletResponse response)
+    public void getImage(String avatarFileName, HttpServletResponse response)
     {
         try
         {
@@ -100,5 +75,43 @@ public class AvatarService
         {
             ExceptionLogger.logExceptionInfo(e);
         }
+    }
+
+    public ServiceResponse<String> uploadVideoCover(MultipartFile coverFile)
+    {
+        return uploadImage(coverFile, videoCoverUrlPrefix);
+    }
+
+    private ServiceResponse<String> uploadImage(MultipartFile imageFile, String urlPrefix)
+    {
+        if (imageFile == null)
+            return ServiceResponse.buildErrorResponse(-3, "Argument null.");
+
+        String originalFilename = imageFile.getOriginalFilename();
+
+        if (originalFilename == null)
+            return ServiceResponse.buildErrorResponse(-4, "Original file name is null.");
+
+        int lastIndexOfDot = originalFilename.lastIndexOf(".");
+        String fileSuffix = originalFilename.substring(lastIndexOfDot);
+
+        if (!ACCEPTABLE_IMAGE_FILE_SUFFIXES.contains(fileSuffix))
+            return ServiceResponse.buildErrorResponse(-5, String.format("Unacceptable image suffix: %s, acceptable file formats are: %s.", fileSuffix, ACCEPTABLE_IMAGE_FILE_SUFFIX_TEXT));
+
+        String imageFileName = UUID.randomUUID().toString();
+        imageFileName += fileSuffix;
+
+        try
+        {
+            easyMinio.uploadFileByStream(bucketNameImages, imageFileName, imageFile.getInputStream());
+        }
+        catch (Exception e)
+        {
+            ExceptionLogger.logExceptionInfo(e);
+            return ServiceResponse.buildErrorResponse(-1, "Upload failure, see log for more information.");
+        }
+
+        String imageUrl = urlPrefix + imageFileName;
+        return ServiceResponse.buildSuccessResponse(imageUrl);
     }
 }

@@ -9,6 +9,7 @@ import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
 import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
 import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
 import stark.stellasearch.dto.results.VideoUploadingOption;
+import stark.stellasearch.service.ImageService;
 import stark.stellasearch.service.VideoService;
 import stark.stellasearch.service.VideoUploadingOptionHolder;
 
@@ -22,6 +23,9 @@ public class VideoController
 {
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private ImageService imageService;
 
     @Autowired
     private VideoUploadingOptionHolder videoUploadingOptionHolder;
@@ -49,5 +53,11 @@ public class VideoController
     public ServiceResponse<VideoUploadingOption> getVideoUploadingOptions()
     {
         return videoUploadingOptionHolder.getVideoUploadingOptions();
+    }
+
+    @PostMapping("/upload-cover")
+    public ServiceResponse<String> uploadVideoCover(@RequestParam("coverFile") MultipartFile coverFile)
+    {
+        return imageService.uploadVideoCover(coverFile);
     }
 }

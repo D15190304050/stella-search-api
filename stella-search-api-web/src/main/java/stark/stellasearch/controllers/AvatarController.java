@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.service.AvatarService;
+import stark.stellasearch.service.ImageService;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,17 +15,17 @@ import javax.servlet.http.HttpServletResponse;
 public class AvatarController
 {
     @Autowired
-    private AvatarService avatarService;
+    private ImageService imageService;
 
     @PostMapping("/upload")
     public ServiceResponse<String> uploadAvatar(@RequestParam("avatarFile") MultipartFile avatarFile)
     {
-        return avatarService.uploadAvatar(avatarFile);
+        return imageService.uploadAvatar(avatarFile);
     }
 
     @GetMapping("/{avatarFileName}")
     public void getAvatar(@PathVariable("avatarFileName") String avatarFileName, HttpServletResponse response)
     {
-        avatarService.getAvatar(avatarFileName, response);
+        imageService.getImage(avatarFileName, response);
     }
 }

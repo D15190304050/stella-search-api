@@ -42,9 +42,6 @@ public class VideoService
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
 
-    @Value("${dataworks.easy-minio.bucket-name-video-covers}")
-    private String bucketNameVideoCovers;
-
     @Autowired
     private RedisQuickOperation redisQuickOperation;
 
@@ -228,5 +225,5 @@ public class VideoService
         redisQuickOperation.delete(videoFileExtensionKey);
     }
 
-//    private ServiceResponse<List<>>
+
 }
