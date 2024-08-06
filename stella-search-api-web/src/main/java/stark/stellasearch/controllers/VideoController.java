@@ -7,12 +7,15 @@ import org.springframework.web.multipart.MultipartFile;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
 import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
+import stark.stellasearch.dto.params.SetVideoInfoRequest;
 import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
 import stark.stellasearch.dto.results.VideoUploadingOption;
 import stark.stellasearch.service.ImageService;
 import stark.stellasearch.service.VideoService;
 import stark.stellasearch.service.VideoUploadingOptionHolder;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +47,7 @@ public class VideoController
     }
 
     @PostMapping("/compose-chunks")
-    public ServiceResponse<Boolean> composeVideoChunks(@RequestBody ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    public ServiceResponse<Long> composeVideoChunks(@RequestBody ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         return videoService.composeVideoChunks(request);
     }
@@ -59,5 +62,17 @@ public class VideoController
     public ServiceResponse<String> uploadVideoCover(@RequestParam("coverFile") MultipartFile coverFile)
     {
         return imageService.uploadVideoCover(coverFile);
+    }
+
+    @GetMapping("/cover/{coverFileName}")
+    public void getAvatar(@PathVariable("coverFileName") String coverFileName, HttpServletResponse response)
+    {
+        imageService.getImage(coverFileName, response);
+    }
+
+    @PostMapping("/set-info")
+    public ServiceResponse<Boolean> setVideoInfo(@RequestBody SetVideoInfoRequest request)
+    {
+        return videoService.setVideoInfo(request);
     }
 }

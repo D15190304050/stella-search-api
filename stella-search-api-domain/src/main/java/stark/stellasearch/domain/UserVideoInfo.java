@@ -32,17 +32,17 @@ public class UserVideoInfo
      * Creation type of the video: 0 - Original; 1 - Reprint.
      * See {@link VideoCreationType} for more detailed definition.
      */
-    private int creationType;
+    private long creationTypeId;
 
     /**
      * ID of the section that the video belongs to.
      */
-    private int sectionId;
+    private long sectionId;
 
     /**
      * Labels of the video, separated by ",", e.g., "Game,Challenge".
      */
-    private String labels;
+    private String labelIds;
 
     /**
      * Introduction to the video.

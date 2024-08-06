@@ -6,13 +6,73 @@
         <result property="videoUrl" column="video_url"/>
         <result property="title" column="title"/>
         <result property="coverUrl" column="cover_url"/>
-        <result property="creationType" column="creation_type"/>
+        <result property="creationTypeId" column="creation_type_id"/>
         <result property="sectionId" column="section_id"/>
-        <result property="labels" column="labels"/>
+        <result property="labelIds" column="label_ids"/>
         <result property="introduction" column="introduction"/>
         <result property="creatorId" column="creator_id"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modifierId" column="modifier_id"/>
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `user_video_info`
+        (
+            `video_url`,
+            `title`,
+            `cover_url`,
+            `creation_type_id`,
+            `section_id`,
+            `label_ids`,
+            `introduction`,
+            `creator_id`,
+            `creation_time`,
+            `modifier_id`,
+            `modification_time`
+        )
+        VALUES
+        (
+            #{videoUrl},
+            #{title},
+            #{coverUrl},
+            #{creationTypeId},
+            #{sectionId},
+            #{labelIds},
+            #{introduction},
+            #{creatorId},
+            #{creationTime},
+            #{modifierId},
+            #{modificationTime}
+        )
+    </insert>
+
+    <select id="getVideoInfoById" resultMap="UserVideoInfoResultMap">
+        SELECT
+            `id`,
+            `video_url`,
+            `title`,
+            `cover_url`,
+            `creation_type_id`,
+            `section_id`,
+            `label_ids`,
+            `introduction`,
+            `creator_id`,
+            `creation_time`,
+            `modifier_id`,
+            `modification_time`
+        FROM `user_video_info`
+        WHERE `id` = #{id}
+    </select>
+
+    <update id="updateVideoInfoById">
+        UPDATE `user_video_info`
+        SET `title` = #{title},
+            `cover_url` = #{coverUrl},
+            `creation_type_id` = #{creationTypeId},
+            `section_id` = #{sectionId},
+            `label_ids` = #{labelIds},
+            `introduction` = #{introduction}
+        WHERE `id` = #{id}
+    </update>
 </mapper>

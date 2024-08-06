@@ -8,23 +8,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import stark.dataworks.basic.data.json.JsonSerializer;
 import stark.dataworks.basic.data.redis.RedisQuickOperation;
+import stark.dataworks.basic.params.OutValue;
 import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
-import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
-import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
+import stark.stellasearch.dao.UserVideoInfoMapper;
+import stark.stellasearch.domain.UserVideoInfo;
+import stark.stellasearch.dto.params.*;
 import stark.stellasearch.service.dto.User;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -42,6 +41,9 @@ public class VideoService
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
 
+    @Value("${videos.video-prefix}")
+    private String videoStreamPrefix;
+
     @Autowired
     private RedisQuickOperation redisQuickOperation;
 
@@ -51,6 +53,9 @@ public class VideoService
     @Autowired
     @Qualifier("lowPriorityTaskExecutor")
     private ThreadPoolTaskExecutor lowPriorityTaskExecutor;
+
+    @Autowired
+    private UserVideoInfoMapper userVideoInfoMapper;
 
     private String generateTaskId(long userId)
     {
@@ -147,7 +152,7 @@ public class VideoService
      * @throws XmlParserException
      * @throws InternalException
      */
-    public ServiceResponse<Boolean> composeVideoChunks(@Valid ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    public ServiceResponse<Long> composeVideoChunks(@Valid ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         String taskId = request.getVideoUploadingTaskId();
         if (!redisQuickOperation.containsKey(taskId))
@@ -195,12 +200,34 @@ public class VideoService
         }
 
         // Remove the keys in the redis once uploading finished.
-        clearUploadingTask(taskId);
+        clearUploadingTask(taskId, sortedChunkNames);
 
-        // Remove chunks in MinIO (compose operation will only create a new object without any changes on existing objects.)
-        easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
+        // Save user-video info.
+        long videoId = saveUserVideoInfo(videoName);
 
-        return ServiceResponse.buildSuccessResponse(true);
+        return ServiceResponse.buildSuccessResponse(videoId);
+    }
+
+    /**
+     * Save user-video info.
+     * @param videoName
+     */
+    private long saveUserVideoInfo(String videoName)
+    {
+        User currentUser = UserContextService.getCurrentUser();
+        Date now = new Date();
+
+        UserVideoInfo userVideoInfo = new UserVideoInfo();
+
+        userVideoInfo.setVideoUrl(videoStreamPrefix + videoName);
+        userVideoInfo.setCreatorId(currentUser.getId());
+        userVideoInfo.setCreationTime(now);
+        userVideoInfo.setModifierId(currentUser.getId());
+        userVideoInfo.setModificationTime(now);
+
+        userVideoInfoMapper.insert(userVideoInfo);
+
+        return userVideoInfo.getId();
     }
 
     private void resetExpirationOfUploadingTask(String taskId)
@@ -213,17 +240,115 @@ public class VideoService
      * The resources contain keys in redis, a record in database, and chunks in MinIO.
      * @param taskId
      */
-    private void clearUploadingTask(String taskId)
+    private void clearUploadingTask(String taskId, List<String> sortedChunkNames) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         // TODO: Clear the database record.
 
-        String chunkCountKey = generateTaskChunkCountKey(taskId);
-        String videoFileExtensionKey = taskId + VIDEO_FILE_EXTENSION;
+        lowPriorityTaskExecutor.execute(() ->
+        {
+            String chunkCountKey = generateTaskChunkCountKey(taskId);
+            String videoFileExtensionKey = taskId + VIDEO_FILE_EXTENSION;
 
-        redisQuickOperation.delete(taskId);
-        redisQuickOperation.delete(chunkCountKey);
-        redisQuickOperation.delete(videoFileExtensionKey);
+            redisQuickOperation.delete(taskId);
+            redisQuickOperation.delete(chunkCountKey);
+            redisQuickOperation.delete(videoFileExtensionKey);
+
+            // Remove chunks in MinIO (compose operation will only create a new object without any changes on existing objects.)
+            try
+            {
+                easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
+            }
+            catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                   NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
+                   InternalException e)
+            {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
+    public ServiceResponse<Boolean> setVideoInfo(@Valid SetVideoInfoRequest request)
+    {
+        OutValue<String> message = new OutValue<>();
+        OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
 
+        if (!validateVideoInfo(request, message, userVideoInfoOutValue))
+        {
+            log.error("Validation error: {}", message.getValue());
+            return ServiceResponse.buildErrorResponse(-100, message.getValue());
+        }
+
+        updateVideoInfo(request, userVideoInfoOutValue);
+
+        return ServiceResponse.buildSuccessResponse(true);
+    }
+
+    private void updateVideoInfo(SetVideoInfoRequest request, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
+        List<Long> labels = request.getLabels();
+        String labelArrayText = JsonSerializer.serialize(labels);
+
+        UserVideoInfo videoInfo = userVideoInfoOutValue.getValue();
+        videoInfo.setTitle(request.getTitle());
+        videoInfo.setCoverUrl(request.getCoverUrl());
+        videoInfo.setCreationTypeId(request.getVideoCreationType());
+        videoInfo.setSectionId(request.getSection());
+        videoInfo.setLabelIds(labelArrayText);
+        videoInfo.setIntroduction(request.getIntroduction());
+
+        userVideoInfoMapper.updateVideoInfoById(videoInfo);
+    }
+
+    private boolean validateVideoInfo(SetVideoInfoRequest request, OutValue<String> message, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
+        // Validations:
+        // 1. All labels must be positive.
+        // 2. The video with the specified ID exists.
+        // 3. User uploaded this video.
+        // 4. The video information is not set (i.e. cover URL).
+
+        // region Validation 1.
+        List<Long> labels = request.getLabels();
+
+        for (Long label : labels)
+        {
+            if (label == null || label <= 0)
+            {
+                message.setValue("Invalid label ID: " + label + ". We only accept positive label IDs.");
+                return false;
+            }
+        }
+        // endregion
+
+        // region Validation 2.
+        long videoId = request.getVideoId();
+        UserVideoInfo videoInfo = userVideoInfoMapper.getVideoInfoById(videoId);
+        userVideoInfoOutValue.setValue(videoInfo);
+
+        if (videoInfo == null)
+        {
+            message.setValue("There is no video with id: " + videoId);
+            return false;
+        }
+        // endregion
+
+        // region Validation 3.
+        User currentUser = UserContextService.getCurrentUser();
+        if (videoInfo.getCreatorId() != currentUser.getId())
+        {
+            message.setValue("You can only set up videos with the same creator id.");
+            return false;
+        }
+        // endregion
+
+        // region Validation 4.
+        if (videoInfo.getCoverUrl() != null)
+        {
+            message.setValue("You have already set up video information with title: " + videoInfo.getTitle());
+            return false;
+        }
+        // endregion
+
+        return true;
+    }
 }
