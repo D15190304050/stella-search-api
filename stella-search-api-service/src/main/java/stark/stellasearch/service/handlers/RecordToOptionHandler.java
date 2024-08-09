@@ -2,6 +2,7 @@ package stark.stellasearch.service.handlers;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import stark.dataworks.basic.beans.FieldExtractor;
 import stark.stellasearch.dto.results.DropDownOption;
 
 import java.lang.reflect.Field;
@@ -24,7 +25,7 @@ public class RecordToOptionHandler
         TRecord firstRecord = records.get(0);
 
         Class<?> recordClass = firstRecord.getClass();
-        Field[] fields = recordClass.getDeclaredFields();
+        List<Field> fields = FieldExtractor.getAllFields(recordClass);
 
         Field titleField = null;
         Field valueField = null;

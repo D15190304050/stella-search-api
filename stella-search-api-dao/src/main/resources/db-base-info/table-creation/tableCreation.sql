@@ -182,8 +182,8 @@ CREATE TABLE `video_play_record`
     COLLATE = utf8mb4_bin
     COMMENT = 'Play records of videos.';
 
-DROP TABLE IF EXISTS `video_comment`;
-CREATE TABLE `video_comment`
+DROP TABLE IF EXISTS `user_video_comment`;
+CREATE TABLE `user_video_comment`
 (
     `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
     `user_id`           BIGINT                                                 NOT NULL COMMENT 'ID of the user who comments.',

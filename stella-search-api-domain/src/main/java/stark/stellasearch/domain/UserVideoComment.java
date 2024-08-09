@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class VideoComment extends DomainBase
+public class UserVideoComment extends DomainBase
 {
     /**
      * ID of the user who comments.

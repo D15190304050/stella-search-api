@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="stark.stellasearch.dao.VideoCommentMapper">
-    <resultMap id="VideoCommentResultMap" type="stark.stellasearch.domain.VideoComment">
+    <resultMap id="VideoCommentResultMap" type="stark.stellasearch.domain.UserVideoComment">
         <id property="id" column="id"/>
         <result property="videoId" column="video_id"/>
         <result property="content" column="content"/>

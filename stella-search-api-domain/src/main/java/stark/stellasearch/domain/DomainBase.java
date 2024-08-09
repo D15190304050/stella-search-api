@@ -1,7 +1,10 @@
 package stark.stellasearch.domain;
 
+import lombok.Data;
+
 import java.util.Date;
 
+@Data
 public abstract class DomainBase
 {
     /**

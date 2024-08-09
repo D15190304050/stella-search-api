@@ -23,6 +23,10 @@
         <result property="coverUrl" column="cover_url"/>
         <result property="introduction" column="introduction"/>
         <result property="uploadedTime" column="creation_time"/>
+        <result property="playCount" column="play_count"/>
+        <result property="collectionCount" column="favorites_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -86,15 +90,44 @@
     </update>
 
     <select id="getVideoInfosByUserId" resultMap="VideoInfoMap">
-        SELECT `id`,
-               `video_url`,
-               `title`,
-               `cover_url`,
-               `introduction`,
-               `creation_time`
-        FROM `user_video_info`
-        WHERE `creator_id` = #{userId}
-          AND `title` IS NOT NULL
+        SELECT uvi.id                           AS id,
+               uvi.video_url                    AS video_url,
+               uvi.title                        AS title,
+               uvi.cover_url                    AS cover_url,
+               uvi.introduction                 AS introduction,
+               uvi.creation_time                AS creation_time,
+               COALESCE(vpr.play_count, 0)      AS play_count,
+               COALESCE(uvf.favorites_count, 0) AS favorites_count,
+               COALESCE(uvl.like_count, 0)      AS like_count,
+               COALESCE(uvc.comment_count, 0)   AS comment_count
+        FROM user_video_info uvi
+                 LEFT JOIN
+             (SELECT video_id,
+                     COUNT(id) AS play_count
+              FROM video_play_record
+              WHERE user_id = 2
+              GROUP BY video_id) vpr
+             ON
+                 uvi.id = vpr.video_id
+                 LEFT JOIN (SELECT video_id,
+                                   COUNT(*) AS favorites_count
+                            FROM user_video_favorites
+                            WHERE user_id = 2
+                            GROUP BY video_id) AS uvf
+                           ON uvi.id = uvf.video_id
+                 LEFT JOIN (SELECT video_id, COUNT(*) AS like_count
+                            FROM user_video_like
+                            WHERE user_id = 2
+                              AND like_type = 1
+                            GROUP BY video_id) AS uvl
+                           ON uvi.id = uvl.video_id
+                 LEFT JOIN (SELECT video_id, COUNT(*) AS comment_count
+                            FROM user_video_comment
+                            WHERE user_id = 2
+                            GROUP BY video_id) AS uvc
+                           ON uvi.id = uvc.video_id
+        WHERE uvi.creator_id = 2
+          AND uvi.title IS NOT NULL
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 </mapper>
