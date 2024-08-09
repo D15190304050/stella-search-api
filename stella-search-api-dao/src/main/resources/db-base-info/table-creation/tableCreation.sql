@@ -49,9 +49,9 @@ CREATE TABLE `user_video_info`
     `video_url`         VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'URL of the video.',
     `title`             VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'Title of the video.',
     `cover_url`         VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'URL of the cover of the video.',
-    `creation_type_id`     BIGINT COMMENT 'Creation type of the video: 0 - Original; 1 - Reprint.',
+    `creation_type_id`  BIGINT COMMENT 'Creation type of the video: 0 - Original; 1 - Reprint.',
     `section_id`        BIGINT COMMENT 'ID of the section that the video belongs to.',
-    `label_ids`            VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Labels of the video, separated by ",", e.g., "Game,Challenge".',
+    `label_ids`         VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Labels of the video, separated by ",", e.g., "Game,Challenge".',
     `introduction`      VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Introduction to the video.',
     `creator_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the user who uploads the video.',
     `creation_time`     DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
@@ -127,3 +127,97 @@ INSERT INTO `video_label`
 VALUES ('Games', 1, 1),
        ('Action', 1, 1),
        ('Animation', 1, 1);
+
+DROP TABLE IF EXISTS `user_video_favorites`;
+CREATE TABLE `user_video_favorites`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
+    `user_id`           BIGINT   NOT NULL COMMENT 'User ID, who adds the video to favorites.',
+    `video_id`          BIGINT   NOT NULL COMMENT 'ID of the video that is added to favorites.',
+    `playlist_id`       BIGINT   NOT NULL COMMENT 'ID of the playlist that contains the video.',
+    `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_video_id` (`video_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'User video favorites.';
+
+DROP TABLE IF EXISTS `user_video_playlist`;
+CREATE TABLE `user_video_playlist`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
+    `user_id`           BIGINT       NOT NULL COMMENT 'ID of the user who owns the playlist.',
+    `name`              VARCHAR(255) NOT NULL COMMENT 'Name of the playlist.',
+    `creator_id`        BIGINT       NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT       NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Video playlists of users.';
+
+DROP TABLE IF EXISTS `video_play_record`;
+CREATE TABLE `video_play_record`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
+    `user_id`           BIGINT   NOT NULL COMMENT 'ID of the user who watched the video.',
+    `video_id`          BIGINT   NOT NULL COMMENT 'ID of the video that is watched.',
+    `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`),
+    KEY `video_id` (`video_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Play records of videos.';
+
+DROP TABLE IF EXISTS `video_comment`;
+CREATE TABLE `video_comment`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
+    `user_id`           BIGINT                                                 NOT NULL COMMENT 'ID of the user who comments.',
+    `video_id`          BIGINT                                                 NOT NULL COMMENT 'ID of the video that the comment is associated with.',
+    `content`           VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Content of the comment.',
+    `parent_id`         BIGINT                                                 NOT NULL DEFAULT -1 COMMENT 'ID of the parent comment. -1 if no parent.',
+    `creator_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT                                                 NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_creator_id` (`creator_id`),
+    KEY `video_id` (`video_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Comments of videos.';
+
+DROP TABLE IF EXISTS `user_video_like`;
+CREATE TABLE `user_video_like`
+(
+    `id`                BIGINT  PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
+    `user_id`           BIGINT  NOT NULL COMMENT 'ID of the user who gave the opinion, either like or dislike.',
+    `video_id`          BIGINT  NOT NULL COMMENT 'ID of the video associated with the opinion.',
+    `like_type`         TINYINT NOT NULL COMMENT 'Like type: 1 - Like; 2 - Dislike.',
+    `creator_id`        BIGINT NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_video_id` (`video_id`),
+    KEY `idx_like_type` (`like_type`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Records of likes & dislikes of videos.';

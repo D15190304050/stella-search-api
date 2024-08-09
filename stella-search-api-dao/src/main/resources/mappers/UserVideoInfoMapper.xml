@@ -16,6 +16,15 @@
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
 
+    <resultMap id="VideoInfoMap" type="stark.stellasearch.dto.results.VideoInfo">
+        <id property="id" column="id"/>
+        <result property="videoUrl" column="video_url"/>
+        <result property="title" column="title"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="introduction" column="introduction"/>
+        <result property="uploadedTime" column="creation_time"/>
+    </resultMap>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user_video_info`
         (
@@ -75,4 +84,17 @@
             `introduction` = #{introduction}
         WHERE `id` = #{id}
     </update>
+
+    <select id="getVideoInfosByUserId" resultMap="VideoInfoMap">
+        SELECT `id`,
+               `video_url`,
+               `title`,
+               `cover_url`,
+               `introduction`,
+               `creation_time`
+        FROM `user_video_info`
+        WHERE `creator_id` = #{userId}
+          AND `title` IS NOT NULL
+        LIMIT #{pageCapacity} OFFSET #{offset}
+    </select>
 </mapper>

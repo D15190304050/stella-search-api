@@ -2,17 +2,13 @@ package stark.stellasearch.domain;
 
 import lombok.Data;
 
-import java.util.Date;
+import lombok.EqualsAndHashCode;
 import stark.stellasearch.enums.VideoUploadingTaskState;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class VideoUploadingTask
+public class VideoUploadingTask extends DomainBase
 {
-    /**
-     * Auto increment ID.
-     */
-    private long id;
-
     /**
      * Task ID.
      */
@@ -23,24 +19,4 @@ public class VideoUploadingTask
      * See {@link VideoUploadingTaskState} for more detailed definition.
      */
     private int state;
-
-    /**
-     * ID of the creator of the video uploading task, i.e., ID of the user who uploads the video.
-     */
-    private long creatorId;
-
-    /**
-     * Creation time of the video uploading task.
-     */
-    private Date creationTime;
-
-    /**
-     * ID of the modifier of the video uploading task, i.e., ID of the user who uploads the video.
-     */
-    private long modifierId;
-
-    /**
-     * Modification time of the video uploading task.
-     */
-    private Date modificationTime;
 }

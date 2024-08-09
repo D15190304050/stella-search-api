@@ -5,10 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.dto.params.ComposeVideoChunksRequest;
-import stark.stellasearch.dto.params.NewVideoUploadingTaskRequest;
-import stark.stellasearch.dto.params.SetVideoInfoRequest;
-import stark.stellasearch.dto.params.VideoChunkUploadingRequest;
+import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.VideoInfo;
 import stark.stellasearch.dto.results.VideoUploadingOption;
 import stark.stellasearch.service.ImageService;
 import stark.stellasearch.service.VideoService;
@@ -19,6 +17,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/video")
@@ -74,5 +73,11 @@ public class VideoController
     public ServiceResponse<Boolean> setVideoInfo(@RequestBody SetVideoInfoRequest request)
     {
         return videoService.setVideoInfo(request);
+    }
+
+    @GetMapping("/list")
+    public ServiceResponse<List<VideoInfo>> getVideoInfoOfCurrentUser(@ModelAttribute PaginationParam paginationParam)
+    {
+        return videoService.getVideoInfoOfCurrentUser(paginationParam);
     }
 }

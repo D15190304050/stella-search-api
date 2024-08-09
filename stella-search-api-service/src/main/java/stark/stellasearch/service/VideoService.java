@@ -17,6 +17,7 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.VideoInfo;
 import stark.stellasearch.service.dto.User;
 
 import javax.validation.Valid;
@@ -350,5 +351,21 @@ public class VideoService
         // endregion
 
         return true;
+    }
+
+    public ServiceResponse<List<VideoInfo>> getVideoInfoOfCurrentUser(@Valid PaginationParam paginationParam)
+    {
+        long pageCapacity = paginationParam.getPageCapacity();
+
+        GetVideoInfosByUserIdParam queryParam = new GetVideoInfosByUserIdParam();
+        queryParam.setUserId(UserContextService.getCurrentUser().getId());
+        queryParam.setPageCapacity(pageCapacity);
+        queryParam.setOffset(pageCapacity * (paginationParam.getPageIndex() - 1));
+
+        List<VideoInfo> videoInfos = userVideoInfoMapper.getVideoInfosByUserId(queryParam);
+        ServiceResponse<List<VideoInfo>> response = ServiceResponse.buildSuccessResponse(videoInfos);
+        response.putExtra("size", videoInfos.size());
+
+        return response;
     }
 }
