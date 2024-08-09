@@ -80,4 +80,10 @@ public class VideoController
     {
         return videoService.getVideoInfoOfCurrentUser(paginationParam);
     }
+
+    @GetMapping("/count")
+    public ServiceResponse<Long> countVideoByUserId()
+    {
+        return videoService.countVideoByUserId();
+    }
 }

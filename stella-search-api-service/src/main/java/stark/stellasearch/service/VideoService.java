@@ -368,4 +368,10 @@ public class VideoService
 
         return response;
     }
+
+    public ServiceResponse<Long> countVideoByUserId()
+    {
+        Long count = userVideoInfoMapper.countVideoByUserId(UserContextService.getCurrentUser().getId());
+        return ServiceResponse.buildSuccessResponse(count);
+    }
 }

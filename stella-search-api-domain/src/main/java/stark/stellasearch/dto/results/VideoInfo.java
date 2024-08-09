@@ -14,7 +14,7 @@ public class VideoInfo
     private String introduction;
     private Date uploadedTime;
     private long playCount;
-    private long collectionCount;
+    private long favoritesCount;
     private long likeCount;
     private long commentCount;
 }
