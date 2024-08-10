@@ -289,6 +289,7 @@ public class VideoService
     private void updateVideoInfo(SetVideoInfoRequest request, OutValue<UserVideoInfo> userVideoInfoOutValue)
     {
         List<Long> labels = request.getLabels();
+        labels.sort(Long::compareTo);
         String labelArrayText = JsonSerializer.serialize(labels);
 
         UserVideoInfo videoInfo = userVideoInfoOutValue.getValue();
@@ -419,6 +420,7 @@ public class VideoService
     {
         String labelIds = userVideoInfo.getLabelIds();
         List<Long> labels = JsonSerializer.deserializeList(labelIds, Long.class);
+        labels.sort(Long::compareTo);
 
         SetVideoInfoRequest request = new SetVideoInfoRequest();
 
