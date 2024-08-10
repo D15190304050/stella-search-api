@@ -137,4 +137,22 @@
         WHERE `creator_id` = #{userId}
           AND `title` IS NOT NULL
     </select>
+
+    <select id="getVideoBaseInfoById" resultMap="UserVideoInfoResultMap">
+        SELECT
+            `id`,
+            `video_url`,
+            `title`,
+            `cover_url`,
+            `creation_type_id`,
+            `section_id`,
+            `label_ids`,
+            `introduction`,
+            `creator_id`,
+            `creation_time`,
+            `modifier_id`,
+            `modification_time`
+        FROM `user_video_info`
+        WHERE `id` = #{id}
+    </select>
 </mapper>

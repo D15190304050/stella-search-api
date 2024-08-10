@@ -15,4 +15,5 @@ public interface UserVideoInfoMapper
     int updateVideoInfoById(UserVideoInfo userVideoInfo);
     List<VideoInfo> getVideoInfosByUserId(GetVideoInfosByUserIdParam getVideoInfosByUserIdParam);
     long countVideoByUserId(long userId);
+    UserVideoInfo getVideoBaseInfoById(long id);
 }

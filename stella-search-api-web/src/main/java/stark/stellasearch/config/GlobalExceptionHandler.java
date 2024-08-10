@@ -11,7 +11,7 @@ import javax.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler
 {
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class, IllegalArgumentException.class})
     public ServiceResponse<?> handleValidationException(Exception e)
     {
         ExceptionLogger.logExceptionInfo(e);

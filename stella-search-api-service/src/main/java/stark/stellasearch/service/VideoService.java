@@ -2,6 +2,7 @@ package stark.stellasearch.service;
 
 import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -273,14 +274,15 @@ public class VideoService
         OutValue<String> message = new OutValue<>();
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
 
-        if (!validateVideoInfo(request, message, userVideoInfoOutValue))
-        {
-            log.error("Validation error: {}", message.getValue());
-            return ServiceResponse.buildErrorResponse(-100, message.getValue());
-        }
+        if (!validateVideoInfoForInitialization(request, message, userVideoInfoOutValue))
+            return updateVideoInfoError(message);
 
+        return updateVideoInfoResponse(request, userVideoInfoOutValue);
+    }
+
+    private ServiceResponse<Boolean> updateVideoInfoResponse(SetVideoInfoRequest request, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
         updateVideoInfo(request, userVideoInfoOutValue);
-
         return ServiceResponse.buildSuccessResponse(true);
     }
 
@@ -300,13 +302,35 @@ public class VideoService
         userVideoInfoMapper.updateVideoInfoById(videoInfo);
     }
 
-    private boolean validateVideoInfo(SetVideoInfoRequest request, OutValue<String> message, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    private boolean validateVideoInfoForInitialization(SetVideoInfoRequest request, OutValue<String> message, OutValue<UserVideoInfo> userVideoInfoOutValue)
     {
         // Validations:
         // 1. All labels must be positive.
         // 2. The video with the specified ID exists.
         // 3. User uploaded this video.
         // 4. The video information is not set (i.e. cover URL).
+        // Validations 1, 2, 3 are implemented in the method validateVideoInfoForUpdate().
+
+        validateVideoInfoForUpdate(request, message, userVideoInfoOutValue);
+        UserVideoInfo videoInfo = userVideoInfoOutValue.getValue();
+
+        // region Validation 4.
+        if (videoInfo.getCoverUrl() != null)
+        {
+            message.setValue("You have already set up video information with title: " + videoInfo.getTitle());
+            return false;
+        }
+        // endregion
+
+        return true;
+    }
+
+    private boolean validateVideoInfoForUpdate(SetVideoInfoRequest request, OutValue<String> message, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
+        // Validations:
+        // 1. All labels must be positive.
+        // 2. The video with the specified ID exists.
+        // 3. User uploaded this video.
 
         // region Validation 1.
         List<Long> labels = request.getLabels();
@@ -342,14 +366,6 @@ public class VideoService
         }
         // endregion
 
-        // region Validation 4.
-        if (videoInfo.getCoverUrl() != null)
-        {
-            message.setValue("You have already set up video information with title: " + videoInfo.getTitle());
-            return false;
-        }
-        // endregion
-
         return true;
     }
 
@@ -373,5 +389,66 @@ public class VideoService
     {
         Long count = userVideoInfoMapper.countVideoByUserId(UserContextService.getCurrentUser().getId());
         return ServiceResponse.buildSuccessResponse(count);
+    }
+
+    public ServiceResponse<Boolean> updateVideoInfo(@Valid SetVideoInfoRequest request)
+    {
+        OutValue<String> message = new OutValue<>();
+        OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
+
+        if (!validateVideoInfoForUpdate(request, message, userVideoInfoOutValue))
+            return updateVideoInfoError(message);
+
+        return updateVideoInfoResponse(request, userVideoInfoOutValue);
+    }
+
+    private static ServiceResponse<Boolean> updateVideoInfoError(OutValue<String> message)
+    {
+        log.error("Validation error: {}", message.getValue());
+        return ServiceResponse.buildErrorResponse(-100, message.getValue());
+    }
+
+    public ServiceResponse<SetVideoInfoRequest> getVideoBaseInfoById(long videoId)
+    {
+        UserVideoInfo userVideoInfo = validateVideoId(videoId);
+        SetVideoInfoRequest request = convertToVideoInfo(userVideoInfo);
+        return ServiceResponse.buildSuccessResponse(request);
+    }
+
+    private static SetVideoInfoRequest convertToVideoInfo(UserVideoInfo userVideoInfo)
+    {
+        String labelIds = userVideoInfo.getLabelIds();
+        List<Long> labels = JsonSerializer.deserializeList(labelIds, Long.class);
+
+        SetVideoInfoRequest request = new SetVideoInfoRequest();
+
+        request.setVideoId(userVideoInfo.getId());
+        request.setTitle(userVideoInfo.getTitle());
+        request.setCoverUrl(userVideoInfo.getCoverUrl());
+        request.setIntroduction(userVideoInfo.getIntroduction());
+        request.setSection(userVideoInfo.getSectionId());
+        request.setVideoCreationType(userVideoInfo.getCreationTypeId());
+        request.setLabels(labels);
+
+        return request;
+    }
+
+    private UserVideoInfo validateVideoId(long videoId)
+    {
+        if (videoId < 0)
+            throw new IllegalArgumentException("Invalid video ID: " + videoId);
+
+        UserVideoInfo userVideoInfo = userVideoInfoMapper.getVideoBaseInfoById(videoId);
+        if (userVideoInfo == null)
+            throw new IllegalArgumentException("Invalid video ID: " + videoId);
+
+        long creatorId = userVideoInfo.getCreatorId();
+        if (UserContextService.getCurrentUser().getId() != creatorId)
+            throw new IllegalArgumentException("You can only update information of videos uploaded by yourself.");
+
+        if (userVideoInfo.getTitle() == null)
+            throw new IllegalArgumentException("You can only update information of existing video.");
+
+        return userVideoInfo;
     }
 }

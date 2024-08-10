@@ -86,4 +86,16 @@ public class VideoController
     {
         return videoService.countVideoByUserId();
     }
+
+    @PutMapping("/update")
+    public ServiceResponse<Boolean> updateVideoInfo(@RequestBody SetVideoInfoRequest request)
+    {
+        return videoService.updateVideoInfo(request);
+    }
+
+    @GetMapping("/info")
+    public ServiceResponse<SetVideoInfoRequest> getVideoBaseInfoById(@RequestParam("videoId") long videoId)
+    {
+        return videoService.getVideoBaseInfoById(videoId);
+    }
 }
