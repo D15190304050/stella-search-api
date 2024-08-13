@@ -13,7 +13,6 @@ import stark.stellasearch.service.VideoService;
 import stark.stellasearch.service.VideoUploadingOptionHolder;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -64,7 +63,7 @@ public class VideoController
     }
 
     @GetMapping("/cover/{coverFileName}")
-    public void getAvatar(@PathVariable("coverFileName") String coverFileName, HttpServletResponse response)
+    public void getVideoCover(@PathVariable("coverFileName") String coverFileName, HttpServletResponse response)
     {
         imageService.getImage(coverFileName, response);
     }
@@ -97,5 +96,17 @@ public class VideoController
     public ServiceResponse<SetVideoInfoRequest> getVideoBaseInfoById(@RequestParam("videoId") long videoId)
     {
         return videoService.getVideoBaseInfoById(videoId);
+    }
+
+    @GetMapping("/play")
+    public ServiceResponse<String> getVideoPlayUrlById(@RequestParam("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    {
+        return videoService.getVideoPlayUrlById(videoId);
+    }
+
+    @GetMapping("/stream/{videoNameInOss}")
+    public ServiceResponse<String> getVideoPlayUrlByNameInOss(@PathVariable("videoNameInOss") String videoNameInOss) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    {
+        return videoService.getVideoPlayUrlByNameInOss(videoNameInOss);
     }
 }

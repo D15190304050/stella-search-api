@@ -155,4 +155,11 @@
         FROM `user_video_info`
         WHERE `id` = #{id}
     </select>
+
+    <select id="countVideoInfoByUrl" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_info`
+        WHERE `video_url` = #{videoUrl}
+          AND `title` IS NOT NULL
+    </select>
 </mapper>

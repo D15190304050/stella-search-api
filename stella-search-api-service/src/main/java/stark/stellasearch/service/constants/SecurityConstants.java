@@ -29,6 +29,7 @@ public class SecurityConstants
                     "/avatar/upload",
                     "/account/register",
                     "/account/validate-token",
-                    "/video/cover/*"
+                    "/video/cover/*",
+                    "video/play"
             };
 }
