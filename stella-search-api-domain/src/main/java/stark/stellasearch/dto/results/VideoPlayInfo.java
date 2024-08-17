@@ -13,7 +13,7 @@ public class VideoPlayInfo
     private String coverUrl;
     private String introduction;
     private Date creationTime;
-    private Date uploadedTime;
+    private Date modificationTime;
     private long playCount;
     private long favoritesCount;
     private long likeCount;

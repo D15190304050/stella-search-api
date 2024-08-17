@@ -23,7 +23,7 @@
         <result property="coverUrl" column="cover_url"/>
         <result property="introduction" column="introduction"/>
         <result property="creationTime" column="creation_time"/>
-        <result property="uploadedTime" column="modification_time"/>
+        <result property="modificationTime" column="modification_time"/>
         <result property="playCount" column="play_count"/>
         <result property="favoritesCount" column="favorites_count"/>
         <result property="likeCount" column="like_count"/>
