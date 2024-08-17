@@ -473,17 +473,6 @@ public class VideoService
 
         String videoNameInOss = videoInfo.getVideoUrl().substring(videoStreamPrefix.length());
 
-        return getVideoPlayUrlByNameInOss(videoNameInOss);
-    }
-
-    public ServiceResponse<String> getVideoPlayUrlByNameInOss(String videoNameInOss) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
-        String videoUrl = videoStreamPrefix + videoNameInOss;
-
-        long videoCount = userVideoInfoMapper.countVideoInfoByUrl(videoUrl);
-        if (videoCount == 0)
-            return ServiceResponse.buildErrorResponse(-8, "There is no video " + videoNameInOss + " in our storage system.");
-
         String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoNameInOss);
         return ServiceResponse.buildSuccessResponse(videoPlayUrl);
     }

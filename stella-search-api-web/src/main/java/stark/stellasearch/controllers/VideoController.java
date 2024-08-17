@@ -98,15 +98,9 @@ public class VideoController
         return videoService.getVideoBaseInfoById(videoId);
     }
 
-    @GetMapping("/play")
-    public ServiceResponse<String> getVideoPlayUrlById(@RequestParam("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    @GetMapping("/stream/{videoId}")
+    public ServiceResponse<String> getVideoPlayUrlByNameInOss(@PathVariable("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         return videoService.getVideoPlayUrlById(videoId);
-    }
-
-    @GetMapping("/stream/{videoNameInOss}")
-    public ServiceResponse<String> getVideoPlayUrlByNameInOss(@PathVariable("videoNameInOss") String videoNameInOss) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
-        return videoService.getVideoPlayUrlByNameInOss(videoNameInOss);
     }
 }
