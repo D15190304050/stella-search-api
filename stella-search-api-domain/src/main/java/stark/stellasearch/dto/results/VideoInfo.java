@@ -8,7 +8,7 @@ import java.util.Date;
 public class VideoInfo
 {
     private long id;
-    private String videoUrl;
+    private String nameInOss;
     private String title;
     private String coverUrl;
     private String introduction;

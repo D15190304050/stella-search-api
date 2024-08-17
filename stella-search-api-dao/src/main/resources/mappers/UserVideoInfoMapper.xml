@@ -3,7 +3,7 @@
 <mapper namespace="stark.stellasearch.dao.UserVideoInfoMapper">
     <resultMap id="UserVideoInfoResultMap" type="stark.stellasearch.domain.UserVideoInfo">
         <id property="id" column="id"/>
-        <result property="videoUrl" column="video_url"/>
+        <result property="nameInOss" column="name_in_oss"/>
         <result property="title" column="title"/>
         <result property="coverUrl" column="cover_url"/>
         <result property="creationTypeId" column="creation_type_id"/>
@@ -18,8 +18,8 @@
 
     <resultMap id="VideoInfoMap" type="stark.stellasearch.dto.results.VideoInfo">
         <id property="id" column="id"/>
-        <result property="videoUrl" column="video_url"/>
         <result property="title" column="title"/>
+        <result property="nameInOss" column="name_in_oss"/>
         <result property="coverUrl" column="cover_url"/>
         <result property="introduction" column="introduction"/>
         <result property="uploadedTime" column="creation_time"/>
@@ -32,7 +32,7 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user_video_info`
         (
-            `video_url`,
+            `name_in_oss`,
             `title`,
             `cover_url`,
             `creation_type_id`,
@@ -46,7 +46,7 @@
         )
         VALUES
         (
-            #{videoUrl},
+            #{nameInOss},
             #{title},
             #{coverUrl},
             #{creationTypeId},
@@ -63,7 +63,7 @@
     <select id="getVideoInfoById" resultMap="UserVideoInfoResultMap">
         SELECT
             `id`,
-            `video_url`,
+            `name_in_oss`,
             `title`,
             `cover_url`,
             `creation_type_id`,
@@ -90,16 +90,16 @@
     </update>
 
     <select id="getVideoInfosByUserId" resultMap="VideoInfoMap">
-        SELECT uvi.`id`                         AS id,
-               uvi.`video_url`                  AS video_url,
-               uvi.`title`                      AS title,
-               uvi.`cover_url`                  AS cover_url,
-               uvi.`introduction`               AS introduction,
-               uvi.`creation_time`              AS creation_time,
-               COALESCE(vpr.play_count, 0)      AS play_count,
-               COALESCE(uvf.favorites_count, 0) AS favorites_count,
-               COALESCE(uvl.like_count, 0)      AS like_count,
-               COALESCE(uvc.comment_count, 0)   AS comment_count
+        SELECT uvi.`id`                         AS `id`,
+               uvi.`title`                      AS `title`,
+               uvi.`name_in_oss`                AS `name_in_oss`,
+               uvi.`cover_url`                  AS `cover_url`,
+               uvi.`introduction`               AS `introduction`,
+               uvi.`creation_time`              AS `creation_time`,
+               COALESCE(vpr.play_count, 0)      AS `play_count`,
+               COALESCE(uvf.favorites_count, 0) AS `favorites_count`,
+               COALESCE(uvl.like_count, 0)      AS `like_count`,
+               COALESCE(uvc.comment_count, 0)   AS `comment_count`
         FROM `user_video_info` uvi
                  LEFT JOIN
              (SELECT `video_id`,
@@ -141,7 +141,7 @@
     <select id="getVideoBaseInfoById" resultMap="UserVideoInfoResultMap">
         SELECT
             `id`,
-            `video_url`,
+            `name_in_oss`,
             `title`,
             `cover_url`,
             `creation_type_id`,
@@ -154,12 +154,5 @@
             `modification_time`
         FROM `user_video_info`
         WHERE `id` = #{id}
-    </select>
-
-    <select id="countVideoInfoByUrl" resultType="long">
-        SELECT COUNT(*)
-        FROM `user_video_info`
-        WHERE `video_url` = #{videoUrl}
-          AND `title` IS NOT NULL
     </select>
 </mapper>

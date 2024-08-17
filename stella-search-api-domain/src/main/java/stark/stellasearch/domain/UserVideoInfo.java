@@ -10,9 +10,9 @@ import stark.stellasearch.enums.VideoCreationType;
 public class UserVideoInfo extends DomainBase
 {
     /**
-     * URL of the video.
+     * Name of the corresponding object in OSS.
      */
-    private String videoUrl;
+    private String nameInOss;
 
     /**
      * Title of the video.

@@ -216,12 +216,15 @@ public class VideoService
      */
     private long saveUserVideoInfo(String videoName)
     {
+        // TODO: Validate if the video name exists in the database (i.e. in MinIO).
+        // We use UUID here, so the probability of collision is relatively small.
+
         User currentUser = UserContextService.getCurrentUser();
         Date now = new Date();
 
         UserVideoInfo userVideoInfo = new UserVideoInfo();
 
-        userVideoInfo.setVideoUrl(videoStreamPrefix + videoName);
+        userVideoInfo.setNameInOss(videoName);
         userVideoInfo.setCreatorId(currentUser.getId());
         userVideoInfo.setCreationTime(now);
         userVideoInfo.setModifierId(currentUser.getId());
@@ -315,7 +318,10 @@ public class VideoService
         // Validations 1, 2 are implemented in the method validateVideoInfoForCreator().
 
         // Validation 1 & 2.
-        validateVideoInfoForCreator(videoId, userVideoInfoOutValue);
+        String errorMessage = validateVideoInfoForCreator(videoId, userVideoInfoOutValue);
+        if (errorMessage != null)
+            return errorMessage;
+
         UserVideoInfo videoInfo = userVideoInfoOutValue.getValue();
 
         // region Validation 3.
@@ -370,7 +376,9 @@ public class VideoService
         // 3. User uploaded this video (=> title != null).
 
         // Validation 1.
-        validateVideoInfoForCreator(videoId, userVideoInfoOutValue);
+        String errorMessage = validateVideoInfoForCreator(videoId, userVideoInfoOutValue);
+        if (errorMessage != null)
+            return errorMessage;
 
         // Validation 3.
         if (userVideoInfoOutValue.getValue().getTitle() == null)
@@ -471,7 +479,7 @@ public class VideoService
         if (videoInfo.getTitle() == null)
             return ServiceResponse.buildErrorResponse(-6, "Invalid video ID: " + videoId);
 
-        String videoNameInOss = videoInfo.getVideoUrl().substring(videoStreamPrefix.length());
+        String videoNameInOss = videoInfo.getNameInOss();
 
         String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoNameInOss);
         return ServiceResponse.buildSuccessResponse(videoPlayUrl);
