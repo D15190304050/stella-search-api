@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.params.*;
-import stark.stellasearch.dto.results.VideoInfo;
+import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.dto.results.VideoUploadingOption;
 import stark.stellasearch.service.ImageService;
 import stark.stellasearch.service.VideoService;
@@ -69,13 +69,13 @@ public class VideoController
     }
 
     @PostMapping("/set-info")
-    public ServiceResponse<Boolean> setVideoInfo(@RequestBody SetVideoInfoRequest request)
+    public ServiceResponse<Boolean> setVideoInfo(@RequestBody VideoInfoFormData request)
     {
         return videoService.setVideoInfo(request);
     }
 
     @GetMapping("/list")
-    public ServiceResponse<List<VideoInfo>> getVideoInfoOfCurrentUser(@ModelAttribute PaginationParam paginationParam)
+    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@ModelAttribute PaginationParam paginationParam)
     {
         return videoService.getVideoInfoOfCurrentUser(paginationParam);
     }
@@ -87,20 +87,20 @@ public class VideoController
     }
 
     @PutMapping("/update")
-    public ServiceResponse<Boolean> updateVideoInfo(@RequestBody SetVideoInfoRequest request)
+    public ServiceResponse<Boolean> updateVideoInfo(@RequestBody VideoInfoFormData request)
     {
         return videoService.updateVideoInfo(request);
     }
 
     @GetMapping("/info")
-    public ServiceResponse<SetVideoInfoRequest> getVideoBaseInfoById(@RequestParam("videoId") long videoId)
+    public ServiceResponse<VideoInfoFormData> getVideoInfoFormDataById(@RequestParam("videoId") long videoId)
     {
-        return videoService.getVideoBaseInfoById(videoId);
+        return videoService.getVideoInfoFormDataById(videoId);
     }
 
-    @GetMapping("/stream/{videoId}")
-    public ServiceResponse<String> getVideoPlayUrlByNameInOss(@PathVariable("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    @GetMapping("/play")
+    public ServiceResponse<VideoPlayInfo> getVideoInfoById(@RequestParam("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
-        return videoService.getVideoPlayUrlById(videoId);
+        return videoService.getVideoInfoById(videoId);
     }
 }

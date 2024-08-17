@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
-public class SetVideoInfoRequest
+public class VideoInfoFormData
 {
     @NotBlank(message = "Title of the video cannot be null.")
     private String title;

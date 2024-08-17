@@ -18,7 +18,7 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.dto.params.*;
-import stark.stellasearch.dto.results.VideoInfo;
+import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
 
 import javax.validation.Valid;
@@ -42,9 +42,6 @@ public class VideoService
 
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
-
-    @Value("${videos.video-prefix}")
-    private String videoStreamPrefix;
 
     @Autowired
     private RedisQuickOperation redisQuickOperation;
@@ -272,7 +269,7 @@ public class VideoService
         });
     }
 
-    public ServiceResponse<Boolean> setVideoInfo(@Valid SetVideoInfoRequest request)
+    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request)
     {
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
 
@@ -287,13 +284,13 @@ public class VideoService
         return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
     }
 
-    private ServiceResponse<Boolean> updateVideoInfoResponse(SetVideoInfoRequest request, UserVideoInfo userVideoInfo)
+    private ServiceResponse<Boolean> updateVideoInfoResponse(VideoInfoFormData request, UserVideoInfo userVideoInfo)
     {
         updateVideoInfo(request, userVideoInfo);
         return ServiceResponse.buildSuccessResponse(true);
     }
 
-    private void updateVideoInfo(SetVideoInfoRequest request, UserVideoInfo userVideoInfo)
+    private void updateVideoInfo(VideoInfoFormData request, UserVideoInfo userVideoInfo)
     {
         List<Long> labels = request.getLabels();
         labels.sort(Long::compareTo);
@@ -387,7 +384,7 @@ public class VideoService
         return null;
     }
 
-    public ServiceResponse<List<VideoInfo>> getVideoInfoOfCurrentUser(@Valid PaginationParam paginationParam)
+    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationParam paginationParam)
     {
         long pageCapacity = paginationParam.getPageCapacity();
 
@@ -396,9 +393,9 @@ public class VideoService
         queryParam.setPageCapacity(pageCapacity);
         queryParam.setOffset(pageCapacity * (paginationParam.getPageIndex() - 1));
 
-        List<VideoInfo> videoInfos = userVideoInfoMapper.getVideoInfosByUserId(queryParam);
-        ServiceResponse<List<VideoInfo>> response = ServiceResponse.buildSuccessResponse(videoInfos);
-        response.putExtra("size", videoInfos.size());
+        List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByUserId(queryParam);
+        ServiceResponse<List<VideoPlayInfo>> response = ServiceResponse.buildSuccessResponse(videoPlayInfos);
+        response.putExtra("size", videoPlayInfos.size());
 
         return response;
     }
@@ -409,7 +406,7 @@ public class VideoService
         return ServiceResponse.buildSuccessResponse(count);
     }
 
-    public ServiceResponse<Boolean> updateVideoInfo(@Valid SetVideoInfoRequest request)
+    public ServiceResponse<Boolean> updateVideoInfo(@Valid VideoInfoFormData request)
     {
         String errorMessage = validateVideoLabels(request.getLabels());
         if (errorMessage != null)
@@ -423,34 +420,34 @@ public class VideoService
         return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
     }
 
-    public ServiceResponse<SetVideoInfoRequest> getVideoBaseInfoById(long videoId)
+    public ServiceResponse<VideoInfoFormData> getVideoInfoFormDataById(long videoId)
     {
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
         String errorMessage = validateVideoIdExistence(videoId, userVideoInfoOutValue);
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-6, errorMessage);
 
-        SetVideoInfoRequest request = convertToVideoInfo(userVideoInfoOutValue.getValue());
+        VideoInfoFormData request = convertToVideoInfoFormData(userVideoInfoOutValue.getValue());
         return ServiceResponse.buildSuccessResponse(request);
     }
 
-    private static SetVideoInfoRequest convertToVideoInfo(UserVideoInfo userVideoInfo)
+    private static VideoInfoFormData convertToVideoInfoFormData(UserVideoInfo userVideoInfo)
     {
         String labelIds = userVideoInfo.getLabelIds();
         List<Long> labels = JsonSerializer.deserializeList(labelIds, Long.class);
         labels.sort(Long::compareTo);
 
-        SetVideoInfoRequest request = new SetVideoInfoRequest();
+        VideoInfoFormData formData = new VideoInfoFormData();
 
-        request.setVideoId(userVideoInfo.getId());
-        request.setTitle(userVideoInfo.getTitle());
-        request.setCoverUrl(userVideoInfo.getCoverUrl());
-        request.setIntroduction(userVideoInfo.getIntroduction());
-        request.setSection(userVideoInfo.getSectionId());
-        request.setVideoCreationType(userVideoInfo.getCreationTypeId());
-        request.setLabels(labels);
+        formData.setVideoId(userVideoInfo.getId());
+        formData.setTitle(userVideoInfo.getTitle());
+        formData.setCoverUrl(userVideoInfo.getCoverUrl());
+        formData.setIntroduction(userVideoInfo.getIntroduction());
+        formData.setSection(userVideoInfo.getSectionId());
+        formData.setVideoCreationType(userVideoInfo.getCreationTypeId());
+        formData.setLabels(labels);
 
-        return request;
+        return formData;
     }
 
     private String validateVideoIdExistence(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
@@ -466,22 +463,15 @@ public class VideoService
         return null;
     }
 
-    public ServiceResponse<String> getVideoPlayUrlById(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    public ServiceResponse<VideoPlayInfo> getVideoInfoById(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
-        OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
+        VideoPlayInfo videoPlayInfo = userVideoInfoMapper.getVideoPlayInfoById(videoId);
+        if (videoPlayInfo == null)
+            return ServiceResponse.buildErrorResponse(-7, "Invalid video ID: " + videoId);
 
-        String errorMessage = validateVideoIdExistence(videoId, userVideoInfoOutValue);
-        if (errorMessage != null)
-            return ServiceResponse.buildErrorResponse(-7, errorMessage);
+        String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
+        videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
 
-        UserVideoInfo videoInfo = userVideoInfoOutValue.getValue();
-
-        if (videoInfo.getTitle() == null)
-            return ServiceResponse.buildErrorResponse(-6, "Invalid video ID: " + videoId);
-
-        String videoNameInOss = videoInfo.getNameInOss();
-
-        String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoNameInOss);
-        return ServiceResponse.buildSuccessResponse(videoPlayUrl);
+        return ServiceResponse.buildSuccessResponse(videoPlayInfo);
     }
 }

@@ -28,8 +28,5 @@ images:
     avatar-url-prefix: http://localhost:${server.port}/avatar/
     video-cover-prefix: http://localhost:${server.port}/video/cover/
 
-videos:
-    video-prefix: http://localhost:${server.port}/video/stream/
-
 stella-search:
     jwt-secret: q4~@x2uC$f@M2x*^e5&DB^L!3~)6@+
