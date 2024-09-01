@@ -41,7 +41,7 @@ public class RegistrationRequest
     private String captcha;
 
     @NotBlank(message = "Please provide captcha ID.")
-    @Pattern(regexp = "^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$", message = "No captcha Id.")
+    @Pattern(regexp = "^Captcha-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$", message = "No captcha Id.")
     private String captchaId;
 
     @NotBlank(message = "Please input your phone number!")
