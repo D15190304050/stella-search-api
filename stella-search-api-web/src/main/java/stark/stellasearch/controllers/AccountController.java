@@ -9,7 +9,6 @@ import stark.stellasearch.service.AccountService;
 import stark.stellasearch.service.CaptchaService;
 import stark.stellasearch.dto.results.CaptchaResponse;
 import stark.stellasearch.dto.results.LoginState;
-import stark.stellasearch.service.constants.SecurityConstants;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
