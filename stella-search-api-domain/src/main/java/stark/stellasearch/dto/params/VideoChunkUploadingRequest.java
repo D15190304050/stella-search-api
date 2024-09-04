@@ -17,5 +17,5 @@ public class VideoChunkUploadingRequest
     private long videoChunkIndex;
 
     @JsonIgnore
-    private MultipartFile videoChunk; // 1 time.
+    private MultipartFile videoChunk;
 }
