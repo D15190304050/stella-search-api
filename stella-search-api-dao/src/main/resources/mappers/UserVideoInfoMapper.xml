@@ -146,6 +146,7 @@
                uvi.`name_in_oss`                AS `name_in_oss`,
                uvi.`cover_url`                  AS `cover_url`,
                uvi.`introduction`               AS `introduction`,
+               uvi.`creator_id`                 AS `creator_id`,
                uvi.`creation_time`              AS `creation_time`,
                uvi.`modification_time`          AS `modification_time`,
                COALESCE(vpr.play_count, 0)      AS `play_count`,

@@ -12,6 +12,7 @@ public class VideoPlayInfo
     private String title;
     private String coverUrl;
     private String introduction;
+    private long creatorId;
     private Date creationTime;
     private Date modificationTime;
     private long playCount;

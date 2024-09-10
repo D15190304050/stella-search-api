@@ -10,4 +10,16 @@
         <result property="modifierId" column="modifier_id"/>
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
+
+    <insert id="insert">
+        INSERT INTO `video_play_record`
+        (`user_id`, `video_id`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`)
+        VALUES (#{userId}, #{videoId}, #{creatorId}, #{creationTime}, #{modifierId}, #{modificationTime})
+    </insert>
+
+    <select id="countPlayCountByVideoId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM `video_play_record`
+        WHERE `video_id` = #{videoId}
+    </select>
 </mapper>
