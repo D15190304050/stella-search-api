@@ -18,13 +18,11 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
 import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
-import stark.stellasearch.domain.VideoCreationType;
 import stark.stellasearch.domain.VideoPlayRecord;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
 
-import javax.servlet.ServletContext;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -465,9 +463,7 @@ public class VideoService {
         if (videoPlayRecordMapper.insert(videoPlayRecord) != 1) {
             return ServiceResponse.buildErrorResponse(-1, "Insert record to table of video play count failed");
         }
-
         videoPlayInfo.setPlayCount(videoPlayRecordMapper.countPlayCountByVideoId(videoPlayInfo.getId()));
-        log.info("{}", videoPlayInfo.getPlayCount());
 
         return ServiceResponse.buildSuccessResponse(videoPlayInfo);
     }

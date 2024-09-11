@@ -22,6 +22,7 @@
         <result property="nameInOss" column="name_in_oss"/>
         <result property="coverUrl" column="cover_url"/>
         <result property="introduction" column="introduction"/>
+        <result property="creatorId" column="creator_id"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modificationTime" column="modification_time"/>
         <result property="playCount" column="play_count"/>
