@@ -11,4 +11,27 @@
         <result property="modifierId" column="modifier_id"/>
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
+
+    <insert id="insertComment">
+        INSERT INTO `user_video_comment`
+        (`user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
+         `modification_time`)
+        VALUES (#{userId}, #{videoId}, #{content}, #{parentId}, #{creatorId}, #{creationTime}, #{modifierId},
+                #{modificationTime})
+    </insert>
+
+    <select id="countIdByParentId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `user_video_comment`
+        WHERE `id` = #{parentId}
+    </select>
+
+    <select id="getVideoCommentsById" resultMap="VideoCommentResultMap" >
+        SELECT `id`, `user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
+        `modification_time`
+        FROM `user_video_comment`
+        WHERE `video_id` = #{videoId}
+        ORDER BY `id` DESC
+        LIMIT #{pageCapacity} OFFSET #{offset}
+    </select>
 </mapper>

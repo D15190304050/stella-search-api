@@ -104,10 +104,4 @@ public class VideoController
     {
         return videoService.getVideoInfoById(videoId);
     }
-
-    @GetMapping
-    public ServiceResponse<UserVideoComment> getVideoCommentById(@RequestParam("commentId") long commentId)
-    {
-        return videoService.getVideoCommentById(commentId);
-    }
 }

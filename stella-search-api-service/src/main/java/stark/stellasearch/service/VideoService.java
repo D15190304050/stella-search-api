@@ -16,6 +16,7 @@ import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
+import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.VideoPlayInfo;
@@ -139,6 +140,7 @@ public class VideoService
 
     /**
      * If all the chunks are uploaded, compose them, and delete the set.
+     *
      * @param request
      * @return
      * @throws ServerException
@@ -209,6 +211,7 @@ public class VideoService
 
     /**
      * Save user-video info.
+     *
      * @param videoName
      */
     private long saveUserVideoInfo(String videoName)
@@ -240,6 +243,7 @@ public class VideoService
     /**
      * Clear the resources of the video uploading task, which will not be used again.
      * The resources contain keys in redis, a record in database, and chunks in MinIO.
+     *
      * @param taskId
      */
     private void clearUploadingTask(String taskId, List<String> sortedChunkNames)
@@ -259,10 +263,9 @@ public class VideoService
             try
             {
                 easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
-            }
-            catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
-                   NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
-                   InternalException e)
+            } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                     NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
+                     InternalException e)
             {
                 throw new RuntimeException(e);
             }
