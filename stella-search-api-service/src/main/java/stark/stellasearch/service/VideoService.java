@@ -452,7 +452,21 @@ public class VideoService {
         String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
         videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
 
-        // Insert record to table of video play count
+        String errorMessage = saveVideoPlayRecord(videoPlayInfo);
+        if (errorMessage != null)
+            return ServiceResponse.buildErrorResponse(-1, errorMessage);
+
+        videoPlayInfo.setPlayCount(videoPlayInfo.getPlayCount() + 1);
+        return ServiceResponse.buildSuccessResponse(videoPlayInfo);
+    }
+
+    /**
+     * Insert record to table of video play count
+     * @param videoPlayInfo
+     * @return
+     */
+    private String saveVideoPlayRecord(VideoPlayInfo videoPlayInfo)
+    {
         Date now = new Date();
         VideoPlayRecord videoPlayRecord = new VideoPlayRecord();
         videoPlayRecord.setUserId(UserContextService.getCurrentUser().getId());
@@ -460,11 +474,10 @@ public class VideoService {
         videoPlayRecord.setCreationTime(now);
         videoPlayRecord.setCreatorId(videoPlayInfo.getCreatorId());
         videoPlayRecord.setModificationTime(now);
-        if (videoPlayRecordMapper.insert(videoPlayRecord) != 1) {
-            return ServiceResponse.buildErrorResponse(-1, "Insert record to table of video play count failed");
-        }
-        videoPlayInfo.setPlayCount(videoPlayRecordMapper.countPlayCountByVideoId(videoPlayInfo.getId()));
 
-        return ServiceResponse.buildSuccessResponse(videoPlayInfo);
+        if (videoPlayRecordMapper.insert(videoPlayRecord) != 1)
+            return "Insert record to table of video play count failed";
+
+        return null;
     }
 }
