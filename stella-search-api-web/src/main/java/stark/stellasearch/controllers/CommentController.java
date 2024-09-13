@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.dto.params.AddCommentsRequest;
+import stark.stellasearch.dto.params.DeleteCommentsRequest;
 import stark.stellasearch.dto.params.GetVideoCommentsRequest;
 import stark.stellasearch.service.CommentService;
 
@@ -29,5 +30,11 @@ public class CommentController
     public ServiceResponse<List<UserVideoComment>> getVideoCommentsById(@ModelAttribute GetVideoCommentsRequest request)
     {
         return commentService.getVideoCommentById(request);
+    }
+
+    @PostMapping("/delete")
+    public ServiceResponse<Boolean> deleteComment(@RequestBody DeleteCommentsRequest request)
+    {
+        return commentService.deleteComment(request);
     }
 }

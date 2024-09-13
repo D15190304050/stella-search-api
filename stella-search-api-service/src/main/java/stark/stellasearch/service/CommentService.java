@@ -10,6 +10,7 @@ import stark.stellasearch.dao.VideoCommentMapper;
 import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.dto.params.AddCommentsRequest;
+import stark.stellasearch.dto.params.DeleteCommentsRequest;
 import stark.stellasearch.dto.params.GetVideoCommentsByIdParam;
 import stark.stellasearch.dto.params.GetVideoCommentsRequest;
 
@@ -84,5 +85,30 @@ public class CommentService
         response.putExtra("size", comments.size());
 
         return response;
+    }
+
+    public ServiceResponse<Boolean> deleteComment(@Valid DeleteCommentsRequest request)
+    {
+        // Validate if comment id exists
+        UserVideoComment commentInfo = videoCommentMapper.getCommentById(request.getCommentId());
+        if (commentInfo == null)
+        {
+            return ServiceResponse.buildErrorResponse(-1, "Invalid video ID: " + request.getCommentId());
+        }
+
+        // Validate if the current user id is the creator of the comment
+        log.info("User ID: " + UserContextService.getCurrentUser().getId());
+        log.info("Comment info: "+ commentInfo);
+        if (UserContextService.getCurrentUser().getId() != commentInfo.getCreatorId())
+        {
+            return ServiceResponse.buildErrorResponse(-2, "You can not delete this comment because you are not the creator of the comment.");
+        }
+
+        // Delete comment
+        if (videoCommentMapper.deleteCommentById(request.getCommentId()) == 0)
+        {
+            return ServiceResponse.buildErrorResponse(-3, "Failed to delete comment.");
+        }
+        return ServiceResponse.buildSuccessResponse(true);
     }
 }

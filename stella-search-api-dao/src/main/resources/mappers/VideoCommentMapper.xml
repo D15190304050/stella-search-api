@@ -3,6 +3,7 @@
 <mapper namespace="stark.stellasearch.dao.VideoCommentMapper">
     <resultMap id="VideoCommentResultMap" type="stark.stellasearch.domain.UserVideoComment">
         <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
         <result property="videoId" column="video_id"/>
         <result property="content" column="content"/>
         <result property="parentId" column="parent_id"/>
@@ -20,6 +21,12 @@
                 #{modificationTime})
     </insert>
 
+    <delete id="deleteCommentById">
+        DELETE
+        FROM `user_video_comment`
+        WHERE `id` = #{commentId}
+    </delete>
+
     <select id="countIdByParentId" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM `user_video_comment`
@@ -33,5 +40,12 @@
         WHERE `video_id` = #{videoId}
         ORDER BY `id` DESC
         LIMIT #{pageCapacity} OFFSET #{offset}
+    </select>
+
+    <select id="getCommentById" resultMap="VideoCommentResultMap">
+        SELECT `id`, `user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
+        `modification_time`
+        FROM `user_video_comment`
+        WHERE `id` = #{commentId}
     </select>
 </mapper>
