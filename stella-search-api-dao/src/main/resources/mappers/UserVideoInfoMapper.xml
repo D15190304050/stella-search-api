@@ -23,6 +23,7 @@
         <result property="coverUrl" column="cover_url"/>
         <result property="introduction" column="introduction"/>
         <result property="creatorId" column="creator_id"/>
+        <result property="creatorName" column="creator_name"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modificationTime" column="modification_time"/>
         <result property="playCount" column="play_count"/>
@@ -148,6 +149,7 @@
                uvi.`cover_url`                  AS `cover_url`,
                uvi.`introduction`               AS `introduction`,
                uvi.`creator_id`                 AS `creator_id`,
+               abi.`username`                   AS `creator_name`,
                uvi.`creation_time`              AS `creation_time`,
                uvi.`modification_time`          AS `modification_time`,
                COALESCE(vpr.play_count, 0)      AS `play_count`,
@@ -180,6 +182,7 @@
                             WHERE `video_id` = #{videoId}
                             GROUP BY `video_id`) AS uvc
                            ON uvi.`id` = uvc.`video_id`
+                 LEFT JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
         WHERE uvi.`id` = #{videoId}
           AND uvi.`title` IS NOT NULL
     </select>
