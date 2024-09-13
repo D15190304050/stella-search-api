@@ -182,7 +182,7 @@
                             WHERE `video_id` = #{videoId}
                             GROUP BY `video_id`) AS uvc
                            ON uvi.`id` = uvc.`video_id`
-                 LEFT JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
+                 INNER JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
         WHERE uvi.`id` = #{videoId}
           AND uvi.`title` IS NOT NULL
     </select>
