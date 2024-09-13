@@ -110,9 +110,9 @@ public class VideoController
         return videoService.likeVideo(request);
     }
 
-    @PostMapping("/dislike")
-    public ServiceResponse<Boolean> dislikeVideo(@RequestBody DislikeVideoRequest request)
+    @PostMapping("/cancel-like")
+    public ServiceResponse<Boolean> cancelLikeVideo(@RequestBody CancelLikeVideoRequest request)
     {
-        return videoService.dislikeVideo(request);
+        return videoService.cancelLikeVideo(request);
     }
 }

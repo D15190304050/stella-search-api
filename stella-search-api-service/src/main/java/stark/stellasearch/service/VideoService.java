@@ -520,7 +520,7 @@ public class VideoService
         return null;
     }
 
-    public ServiceResponse<Boolean> dislikeVideo(@Valid DislikeVideoRequest request)
+    public ServiceResponse<Boolean> cancelLikeVideo(@Valid CancelLikeVideoRequest request)
     {
         VideoPlayInfo videoPlayInfo = userVideoInfoMapper.getVideoPlayInfoById(request.getVideoId());
         if (videoPlayInfo == null)

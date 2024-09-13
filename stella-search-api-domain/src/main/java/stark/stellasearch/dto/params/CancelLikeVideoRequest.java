@@ -5,7 +5,7 @@ import lombok.Data;
 import javax.validation.constraints.Min;
 
 @Data
-public class DislikeVideoRequest
+public class CancelLikeVideoRequest
 {
     @Min(value = 1, message = "Minimum video ID is 1.")
     private long videoId;
