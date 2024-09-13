@@ -12,6 +12,6 @@ public interface VideoCommentMapper
     int countIdByParentId(long parentId);
     int insertComment(UserVideoComment userVideoComment);
     List<UserVideoComment> getVideoCommentsByVideoId(GetVideoCommentsByIdParam queryParam);
-    int deleteCommentById(long commentId);
-    UserVideoComment getCommentById(long commentId);
+    int deleteCommentById(long id);
+    UserVideoComment getCommentById(long id);
 }

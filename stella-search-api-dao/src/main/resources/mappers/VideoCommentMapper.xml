@@ -24,7 +24,7 @@
     <delete id="deleteCommentById">
         DELETE
         FROM `user_video_comment`
-        WHERE `id` = #{commentId}
+        WHERE `id` = #{id}
     </delete>
 
     <select id="countIdByParentId" resultType="java.lang.Integer">
@@ -46,6 +46,6 @@
         SELECT `id`, `user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
         `modification_time`
         FROM `user_video_comment`
-        WHERE `id` = #{commentId}
+        WHERE `id` = #{id}
     </select>
 </mapper>

@@ -8,5 +8,5 @@ import javax.validation.constraints.Min;
 public class DeleteCommentsRequest
 {
     @Min(value = 1, message = "Minimum video ID is 1.")
-    private long commentId;
+    private long id;
 }
