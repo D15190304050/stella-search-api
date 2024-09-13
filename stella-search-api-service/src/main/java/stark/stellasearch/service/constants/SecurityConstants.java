@@ -24,12 +24,12 @@ public class SecurityConstants
 
     public static final String[] NON_AUTHENTICATE_URIS =
             {
-                    "/hello",
+                    "/connection/hello",
                     "/account/captcha",
                     "/avatar/upload",
                     "/account/register",
                     "/account/validate-token",
                     "/video/cover/*",
-                    "video/play"
+                    "/video/play"
             };
 }
