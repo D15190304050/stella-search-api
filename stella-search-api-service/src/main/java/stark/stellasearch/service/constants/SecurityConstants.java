@@ -30,6 +30,6 @@ public class SecurityConstants
                     "/account/register",
                     "/account/validate-token",
                     "/video/cover/*",
-                    "video/play"
+                    "/video/play"
             };
 }

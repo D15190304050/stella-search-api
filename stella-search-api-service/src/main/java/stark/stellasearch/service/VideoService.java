@@ -16,6 +16,7 @@ import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
+import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.VideoPlayRecord;
@@ -258,7 +259,8 @@ public class VideoService {
                 easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
             } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
                      NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
-                     InternalException e) {
+                     InternalException e)
+            {
                 throw new RuntimeException(e);
             }
         });
