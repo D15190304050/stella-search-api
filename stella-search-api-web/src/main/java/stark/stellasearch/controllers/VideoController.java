@@ -103,4 +103,16 @@ public class VideoController
     {
         return videoService.getVideoInfoById(videoId);
     }
+
+    @PostMapping("/like")
+    public ServiceResponse<Boolean> likeVideo(@RequestBody LikeVideoRequest request)
+    {
+        return videoService.likeVideo(request);
+    }
+
+    @PostMapping("/dislike")
+    public ServiceResponse<Boolean> dislikeVideo(@RequestBody DislikeVideoRequest request)
+    {
+        return videoService.dislikeVideo(request);
+    }
 }
