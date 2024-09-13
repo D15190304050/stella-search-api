@@ -16,6 +16,8 @@ import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
+import stark.stellasearch.dao.UserVideoLikeMapper;
+import stark.stellasearch.domain.UserVideoLike;
 import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
@@ -41,6 +43,7 @@ public class VideoService {
     public static final String VIDEO_CHUNK_SET_PLACEHOLDER = "-1";
     public static final String VIDEO_FILE_EXTENSION = "-extension";
     public static final Set<String> VIDEO_FILE_EXTENSION_SET = Set.of(".mp4", ".avi");
+    public static final int VIDEO_LIKE = 1;
 
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
@@ -59,9 +62,13 @@ public class VideoService {
     private UserVideoInfoMapper userVideoInfoMapper;
 
     @Autowired
+    private UserVideoLikeMapper userVideoLikeMapper;
+    
+    @Autowired
     private VideoPlayRecordMapper videoPlayRecordMapper;
 
-    private String generateTaskId(long userId) {
+    private String generateTaskId(long userId)
+    {
         String taskIdPrefix = VIDEO_UPLOAD_TASK_ID_PREFIX + "-" + userId + "-" + System.currentTimeMillis() + "-";
 
         String taskId;
@@ -462,6 +469,54 @@ public class VideoService {
         return ServiceResponse.buildSuccessResponse(videoPlayInfo);
     }
 
+    public ServiceResponse<Boolean> likeVideo(@Valid LikeVideoRequest request)
+    {
+        VideoPlayInfo videoPlayInfo = userVideoInfoMapper.getVideoPlayInfoById(request.getVideoId());
+        if (videoPlayInfo == null)
+            return ServiceResponse.buildErrorResponse(-8, "Invalid video ID: " + request.getVideoId());
+
+        // Validate if the video is liked before
+        UserVideoLike userVideoLike = userVideoLikeMapper.getUserVideoLike(UserContextService.getCurrentUser().getId(), request.getVideoId());
+        if (userVideoLike != null)
+        {
+            return ServiceResponse.buildSuccessResponse(true);
+        }
+
+        String errorMessage = insertVideoLike(request, videoPlayInfo);
+        if (errorMessage != null)
+            return ServiceResponse.buildErrorResponse(-8, errorMessage);
+
+        return ServiceResponse.buildSuccessResponse(true);
+    }
+
+    private String insertVideoLike(LikeVideoRequest request, VideoPlayInfo videoPlayInfo)
+    {
+        UserVideoLike userVideoLikeInfo = new UserVideoLike();
+        Date now = new Date();
+        userVideoLikeInfo.setUserId(UserContextService.getCurrentUser().getId());
+        userVideoLikeInfo.setVideoId(request.getVideoId());
+        userVideoLikeInfo.setLikeType(VIDEO_LIKE);
+        userVideoLikeInfo.setCreatorId(videoPlayInfo.getCreatorId());
+        userVideoLikeInfo.setCreationTime(now);
+        userVideoLikeInfo.setModifierId(videoPlayInfo.getCreatorId());
+        userVideoLikeInfo.setModificationTime(now);
+
+        int result = userVideoLikeMapper.insertLike(userVideoLikeInfo);
+        if (result != 1)
+            return "Failed to like video.";
+
+        return null;
+    }
+
+    public ServiceResponse<Boolean> cancelLikeVideo(@Valid CancelLikeVideoRequest request)
+    {
+        VideoPlayInfo videoPlayInfo = userVideoInfoMapper.getVideoPlayInfoById(request.getVideoId());
+        if (videoPlayInfo == null)
+            return ServiceResponse.buildErrorResponse(-8, "Invalid video ID: " + request.getVideoId());
+
+        userVideoLikeMapper.deleteLike(UserContextService.getCurrentUser().getId(), request.getVideoId());
+        return ServiceResponse.buildSuccessResponse(true);
+    }
     /**
      * Insert record to table of video play count
      * @param videoPlayInfo
