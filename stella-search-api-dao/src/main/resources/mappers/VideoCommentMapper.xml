@@ -26,7 +26,7 @@
         WHERE `id` = #{parentId}
     </select>
 
-    <select id="getVideoCommentsById" resultMap="VideoCommentResultMap" >
+    <select id="getVideoCommentsByVideoId" resultMap="VideoCommentResultMap" >
         SELECT `id`, `user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
         `modification_time`
         FROM `user_video_comment`

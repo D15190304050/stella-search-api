@@ -6,11 +6,12 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 @Data
-public class PaginationParam {
+public class PaginationParam
+{
     @Min(value = 1, message = "Page capacity must be >= 1.")
     @Max(value = 100, message = "Page capacity must be <= 100.")
-    private long pageCapacity = 5;
+    private long pageCapacity;
 
     @Min(value = 1, message = "Page index must be a positive integer.")
-    private long pageIndex = 1;
+    private long pageIndex;
 }

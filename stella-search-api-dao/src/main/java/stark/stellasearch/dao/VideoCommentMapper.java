@@ -13,5 +13,5 @@ public interface VideoCommentMapper
 
     int insertComment(UserVideoComment userVideoComment);
 
-    List<UserVideoComment> getVideoCommentsById(GetVideoCommentsByIdParam queryParam);
+    List<UserVideoComment> getVideoCommentsByVideoId(GetVideoCommentsByIdParam queryParam);
 }
