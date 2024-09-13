@@ -17,7 +17,9 @@ import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
 import stark.stellasearch.domain.UserVideoComment;
+import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
+import stark.stellasearch.domain.VideoPlayRecord;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
@@ -33,8 +35,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @LogArgumentsAndResponse
 @Validated
-public class VideoService
-{
+public class VideoService {
     public static final String VIDEO_UPLOAD_TASK_ID_PREFIX = "videoUpload";
     public static final String VIDEO_CHUNK_COUNT_PREFIX = "chunkCount";
     public static final String VIDEO_CHUNK_SET_PLACEHOLDER = "-1";
@@ -57,8 +58,10 @@ public class VideoService
     @Autowired
     private UserVideoInfoMapper userVideoInfoMapper;
 
-    private String generateTaskId(long userId)
-    {
+    @Autowired
+    private VideoPlayRecordMapper videoPlayRecordMapper;
+
+    private String generateTaskId(long userId) {
         String taskIdPrefix = VIDEO_UPLOAD_TASK_ID_PREFIX + "-" + userId + "-" + System.currentTimeMillis() + "-";
 
         String taskId;
@@ -69,13 +72,11 @@ public class VideoService
         return taskId;
     }
 
-    private String generateTaskChunkCountKey(String taskId)
-    {
+    private String generateTaskChunkCountKey(String taskId) {
         return taskId.replace(VIDEO_UPLOAD_TASK_ID_PREFIX, VIDEO_CHUNK_COUNT_PREFIX);
     }
 
-    public ServiceResponse<String> generateNewVideoUploadingTask(@Valid NewVideoUploadingTaskRequest request)
-    {
+    public ServiceResponse<String> generateNewVideoUploadingTask(@Valid NewVideoUploadingTaskRequest request) {
         String fileExtension = request.getVideoFileExtension();
         if (!VIDEO_FILE_EXTENSION_SET.contains(fileExtension))
             return ServiceResponse.buildErrorResponse(-3, "Unacceptable video file extension: " + fileExtension);
@@ -95,8 +96,7 @@ public class VideoService
         return ServiceResponse.buildSuccessResponse(taskId);
     }
 
-    public ServiceResponse<Boolean> uploadVideoChunk(@Valid VideoChunkUploadingRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
+    public ServiceResponse<Boolean> uploadVideoChunk(@Valid VideoChunkUploadingRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         // Validations:
         // 1. The task ID must exist.
         // 2. The chunk index must between 0 and (chunkCount - 1).
@@ -153,8 +153,7 @@ public class VideoService
      * @throws XmlParserException
      * @throws InternalException
      */
-    public ServiceResponse<Long> composeVideoChunks(@Valid ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
+    public ServiceResponse<Long> composeVideoChunks(@Valid ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         String taskId = request.getVideoUploadingTaskId();
         if (!redisQuickOperation.containsKey(taskId))
             return ServiceResponse.buildErrorResponse(-2, "Invalid video uploading task ID: " + taskId);
@@ -185,8 +184,7 @@ public class VideoService
 
         if (chunkCount == 1)
             easyMinio.copyObject(bucketNameVideos, sortedChunkNames.get(0), videoName);
-        else
-        {
+        else {
             int chunkNamePrefixLength = chunkNamePrefix.length();
 
             sortedChunkNames.sort((x, y) ->
@@ -214,8 +212,7 @@ public class VideoService
      *
      * @param videoName
      */
-    private long saveUserVideoInfo(String videoName)
-    {
+    private long saveUserVideoInfo(String videoName) {
         // TODO: Validate if the video name exists in the database (i.e. in MinIO).
         // We use UUID here, so the probability of collision is relatively small.
 
@@ -235,8 +232,7 @@ public class VideoService
         return userVideoInfo.getId();
     }
 
-    private void resetExpirationOfUploadingTask(String taskId)
-    {
+    private void resetExpirationOfUploadingTask(String taskId) {
         redisQuickOperation.expire(taskId, 30, TimeUnit.MINUTES);
     }
 
@@ -246,8 +242,7 @@ public class VideoService
      *
      * @param taskId
      */
-    private void clearUploadingTask(String taskId, List<String> sortedChunkNames)
-    {
+    private void clearUploadingTask(String taskId, List<String> sortedChunkNames) {
         // TODO: Clear the database record.
 
         lowPriorityTaskExecutor.execute(() ->
@@ -260,8 +255,7 @@ public class VideoService
             redisQuickOperation.delete(videoFileExtensionKey);
 
             // Remove chunks in MinIO (compose operation will only create a new object without any changes on existing objects.)
-            try
-            {
+            try {
                 easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
             } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
                      NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
@@ -272,8 +266,7 @@ public class VideoService
         });
     }
 
-    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request)
-    {
+    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request) {
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
 
         String errorMessage = validateVideoLabels(request.getLabels());
@@ -287,14 +280,12 @@ public class VideoService
         return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
     }
 
-    private ServiceResponse<Boolean> updateVideoInfoResponse(VideoInfoFormData request, UserVideoInfo userVideoInfo)
-    {
+    private ServiceResponse<Boolean> updateVideoInfoResponse(VideoInfoFormData request, UserVideoInfo userVideoInfo) {
         updateVideoInfo(request, userVideoInfo);
         return ServiceResponse.buildSuccessResponse(true);
     }
 
-    private void updateVideoInfo(VideoInfoFormData request, UserVideoInfo userVideoInfo)
-    {
+    private void updateVideoInfo(VideoInfoFormData request, UserVideoInfo userVideoInfo) {
         List<Long> labels = request.getLabels();
         labels.sort(Long::compareTo);
         String labelArrayText = JsonSerializer.serialize(labels);
@@ -309,8 +300,7 @@ public class VideoService
         userVideoInfoMapper.updateVideoInfoById(userVideoInfo);
     }
 
-    private String validateVideoInfoForInitialization(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
-    {
+    private String validateVideoInfoForInitialization(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
         // Validations:
         // 1. The video with the specified ID exists.
         // 2. User uploaded this video.
@@ -332,13 +322,11 @@ public class VideoService
         return null;
     }
 
-    private String validateVideoLabels(List<Long> labels)
-    {
+    private String validateVideoLabels(List<Long> labels) {
         if (CollectionUtils.isEmpty(labels))
             return "There are no video labels.";
 
-        for (Long label : labels)
-        {
+        for (Long label : labels) {
             if (label == null || label <= 0)
                 return "Invalid label ID: " + label + ". We only accept positive label IDs.";
         }
@@ -346,8 +334,7 @@ public class VideoService
         return null;
     }
 
-    private String validateVideoInfoForCreator(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
-    {
+    private String validateVideoInfoForCreator(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
         // Validations:
         // 1. Video exists.
         // 2. Video creator ID = current user ID.
@@ -368,8 +355,7 @@ public class VideoService
         return null;
     }
 
-    private String validateVideoInfoForUpdate(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
-    {
+    private String validateVideoInfoForUpdate(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
         // Validations:
         // 1. Video exists.
         // 2. Video creator ID = current user ID.
@@ -387,8 +373,7 @@ public class VideoService
         return null;
     }
 
-    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationParam paginationParam)
-    {
+    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationParam paginationParam) {
         long pageCapacity = paginationParam.getPageCapacity();
 
         GetVideoInfosByUserIdParam queryParam = new GetVideoInfosByUserIdParam();
@@ -403,14 +388,12 @@ public class VideoService
         return response;
     }
 
-    public ServiceResponse<Long> countVideoByUserId()
-    {
+    public ServiceResponse<Long> countVideoByUserId() {
         Long count = userVideoInfoMapper.countVideoByUserId(UserContextService.getCurrentUser().getId());
         return ServiceResponse.buildSuccessResponse(count);
     }
 
-    public ServiceResponse<Boolean> updateVideoInfo(@Valid VideoInfoFormData request)
-    {
+    public ServiceResponse<Boolean> updateVideoInfo(@Valid VideoInfoFormData request) {
         String errorMessage = validateVideoLabels(request.getLabels());
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-7, errorMessage);
@@ -423,8 +406,7 @@ public class VideoService
         return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
     }
 
-    public ServiceResponse<VideoInfoFormData> getVideoInfoFormDataById(long videoId)
-    {
+    public ServiceResponse<VideoInfoFormData> getVideoInfoFormDataById(long videoId) {
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
         String errorMessage = validateVideoIdExistence(videoId, userVideoInfoOutValue);
         if (errorMessage != null)
@@ -434,8 +416,7 @@ public class VideoService
         return ServiceResponse.buildSuccessResponse(request);
     }
 
-    private static VideoInfoFormData convertToVideoInfoFormData(UserVideoInfo userVideoInfo)
-    {
+    private static VideoInfoFormData convertToVideoInfoFormData(UserVideoInfo userVideoInfo) {
         String labelIds = userVideoInfo.getLabelIds();
         List<Long> labels = JsonSerializer.deserializeList(labelIds, Long.class);
         labels.sort(Long::compareTo);
@@ -453,8 +434,7 @@ public class VideoService
         return formData;
     }
 
-    private String validateVideoIdExistence(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
-    {
+    private String validateVideoIdExistence(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
         if (videoId <= 0)
             return "Invalid video ID: " + videoId;
 
@@ -466,8 +446,7 @@ public class VideoService
         return null;
     }
 
-    public ServiceResponse<VideoPlayInfo> getVideoInfoById(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
+    public ServiceResponse<VideoPlayInfo> getVideoInfoById(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         VideoPlayInfo videoPlayInfo = userVideoInfoMapper.getVideoPlayInfoById(videoId);
         if (videoPlayInfo == null)
             return ServiceResponse.buildErrorResponse(-7, "Invalid video ID: " + videoId);
@@ -475,6 +454,32 @@ public class VideoService
         String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
         videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
 
+        String errorMessage = saveVideoPlayRecord(videoPlayInfo);
+        if (errorMessage != null)
+            return ServiceResponse.buildErrorResponse(-1, errorMessage);
+
+        videoPlayInfo.setPlayCount(videoPlayInfo.getPlayCount() + 1);
         return ServiceResponse.buildSuccessResponse(videoPlayInfo);
+    }
+
+    /**
+     * Insert record to table of video play count
+     * @param videoPlayInfo
+     * @return
+     */
+    private String saveVideoPlayRecord(VideoPlayInfo videoPlayInfo)
+    {
+        Date now = new Date();
+        VideoPlayRecord videoPlayRecord = new VideoPlayRecord();
+        videoPlayRecord.setUserId(UserContextService.getCurrentUser().getId());
+        videoPlayRecord.setVideoId(videoPlayInfo.getId());
+        videoPlayRecord.setCreationTime(now);
+        videoPlayRecord.setCreatorId(videoPlayInfo.getCreatorId());
+        videoPlayRecord.setModificationTime(now);
+
+        if (videoPlayRecordMapper.insert(videoPlayRecord) != 1)
+            return "Insert record to table of video play count failed";
+
+        return null;
     }
 }
