@@ -1,12 +1,12 @@
 package stark.stellasearch.dto.params;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class GetUserFavoritesByPlaylistIdParam
+public class GetUserFavoritesByPlaylistIdParam extends PaginationQueryParam
 {
     private long playlistId;
     private long userId;
-    private long pageCapacity;
-    private long offset;
 }

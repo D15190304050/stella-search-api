@@ -149,8 +149,7 @@ public class PlaylistService
 
         GetUserFavoritesByPlaylistIdParam favoritesByPlaylistIdParam = new GetUserFavoritesByPlaylistIdParam();
         favoritesByPlaylistIdParam.setPlaylistId(request.getPlaylistId());
-        favoritesByPlaylistIdParam.setPageCapacity(request.getPageCapacity());
-        favoritesByPlaylistIdParam.setOffset(request.getPageCapacity() * (request.getPageIndex() - 1));
+        favoritesByPlaylistIdParam.setPaginationParam(request);
         favoritesByPlaylistIdParam.setUserId(UserContextService.getCurrentUser().getId());
         List<UserVideoFavorites> favoritesList = userVideoFavoritesMapper.getFavoritesByPlaylistId(favoritesByPlaylistIdParam);
         ServiceResponse<List<UserVideoFavorites>> response = ServiceResponse.buildSuccessResponse(favoritesList);
