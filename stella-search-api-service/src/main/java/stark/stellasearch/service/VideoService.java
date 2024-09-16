@@ -379,13 +379,10 @@ public class VideoService {
         return null;
     }
 
-    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationParam paginationParam) {
-        long pageCapacity = paginationParam.getPageCapacity();
-
-        GetVideoInfosByUserIdParam queryParam = new GetVideoInfosByUserIdParam();
+    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationRequestParam request) {
+        GetVideoInfosByUserIdQueryParam queryParam = new GetVideoInfosByUserIdQueryParam();
         queryParam.setUserId(UserContextService.getCurrentUser().getId());
-        queryParam.setPageCapacity(pageCapacity);
-        queryParam.setOffset(pageCapacity * (paginationParam.getPageIndex() - 1));
+        queryParam.setPaginationParam(request);
 
         List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByUserId(queryParam);
         ServiceResponse<List<VideoPlayInfo>> response = ServiceResponse.buildSuccessResponse(videoPlayInfos);

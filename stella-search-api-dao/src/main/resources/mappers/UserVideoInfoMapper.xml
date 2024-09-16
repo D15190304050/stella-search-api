@@ -186,4 +186,10 @@
         WHERE uvi.`id` = #{videoId}
           AND uvi.`title` IS NOT NULL
     </select>
+
+    <select id="countVideoById" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_info`
+        WHERE `id` = #{id}
+    </select>
 </mapper>

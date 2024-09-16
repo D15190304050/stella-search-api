@@ -13,6 +13,15 @@
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
 
+    <resultMap id="VideoCommentInfoResultMap" type="stark.stellasearch.dto.results.VideoCommentInfo">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="content" column="content"/>
+        <result property="creationTime" column="creation_time"/>
+    </resultMap>
+
     <insert id="insertComment" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user_video_comment`
         (`user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
@@ -27,18 +36,24 @@
         WHERE `id` = #{id}
     </delete>
 
-    <select id="countIdByParentId" resultType="java.lang.Integer">
+    <select id="countByParentId" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM `user_video_comment`
         WHERE `id` = #{parentId}
     </select>
 
-    <select id="getVideoCommentsByVideoId" resultMap="VideoCommentResultMap" >
-        SELECT `id`, `user_id`, `video_id`, `content`, `parent_id`, `creator_id`, `creation_time`, `modifier_id`,
-        `modification_time`
-        FROM `user_video_comment`
-        WHERE `video_id` = #{videoId}
-        ORDER BY `id` DESC
+    <select id="getVideoCommentsByVideoId" resultMap="VideoCommentInfoResultMap" >
+        SELECT uvc.`id`,
+               uvc.`user_id`,
+               abi.`nickname`,
+               abi.`avatar_url`,
+               uvc.`content`,
+               uvc.`creation_time`
+        FROM `user_video_comment` uvc
+                 INNER JOIN `account_base_info` abi
+                            ON uvc.`user_id` = abi.`id`
+        WHERE uvc.`video_id` = #{videoId}
+        ORDER BY `creation_time`
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 
@@ -47,5 +62,11 @@
         `modification_time`
         FROM `user_video_comment`
         WHERE `id` = #{id}
+    </select>
+
+    <select id="countCommentsByVideoId" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_comment`
+        WHERE `video_id` = #{videoId}
     </select>
 </mapper>
