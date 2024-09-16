@@ -21,7 +21,7 @@ public class CommentController
     private CommentService commentService;
 
     @PostMapping("/add")
-    public ServiceResponse<Boolean> addComment(@RequestBody AddCommentsRequest request)
+    public ServiceResponse<UserVideoComment> addComment(@RequestBody AddCommentsRequest request)
     {
         return commentService.addComment(request);
     }

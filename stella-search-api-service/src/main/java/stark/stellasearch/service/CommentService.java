@@ -29,7 +29,7 @@ public class CommentService
     @Autowired
     private VideoCommentMapper videoCommentMapper;
 
-    public ServiceResponse<Boolean> addComment(@Valid AddCommentsRequest request)
+    public ServiceResponse<UserVideoComment> addComment(@Valid AddCommentsRequest request)
     {
         // 1. Validate if video id exists
         UserVideoInfo videoInfo = userVideoInfoMapper.getVideoBaseInfoById(request.getVideoId());
@@ -60,7 +60,7 @@ public class CommentService
             return ServiceResponse.buildErrorResponse(-3, "Failed to insert comment.");
         }
 
-        return ServiceResponse.buildSuccessResponse(true);
+        return ServiceResponse.buildSuccessResponse(comment);
     }
 
     public ServiceResponse<List<UserVideoComment>> getVideoCommentById(@Valid GetVideoCommentsRequest request)
@@ -97,7 +97,7 @@ public class CommentService
         }
 
         // Validate if the current user id is the creator of the comment
-        if (UserContextService.getCurrentUser().getId() != commentInfo.getCreatorId())
+        if (UserContextService.getCurrentUser().getId() != commentInfo.getUserId())
         {
             return ServiceResponse.buildErrorResponse(-2, "You can not delete this comment because you are not the creator of the comment.");
         }

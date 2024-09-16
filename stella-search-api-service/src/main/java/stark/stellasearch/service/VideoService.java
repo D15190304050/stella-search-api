@@ -18,7 +18,6 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
 import stark.stellasearch.dao.UserVideoLikeMapper;
 import stark.stellasearch.domain.UserVideoLike;
-import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.VideoPlayRecord;

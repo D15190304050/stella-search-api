@@ -5,9 +5,65 @@
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="name" column="name"/>
-        <result property="creatorId" column="creator_id"/>
+        <result property="description" column="description"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modifierId" column="modifier_id"/>
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
+
+    <resultMap id="UserVideoPlaylistWithVideoCountResultMap" type="stark.stellasearch.dto.results.PlaylistWithVideoCount">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modificationTime" column="modification_time"/>
+        <result property="videoCount" column="video_count"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `user_video_playlist`
+        (`user_id`, `name`, `description`, `creation_time`, `modifier_id`, `modification_time`)
+        VALUES (#{userId}, #{name}, #{description}, #{creationTime}, #{modifierId}, #{modificationTime})
+    </insert>
+
+    <update id="update">
+        UPDATE `user_video_playlist`
+        SET `name`              = #{name},
+            `description`       = #{description},
+            `modifier_id`       = #{modifierId},
+            `modification_time` = #{modificationTime}
+        WHERE `id` = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE uvp
+        FROM `user_video_playlist` uvp
+        INNER JOIN `user_video_favorites` uvf
+               ON uvp.id = uvf.playlist_id
+        WHERE uvp.id = #{id}
+    </delete>
+
+    <select id="countPlaylistByUserId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `user_video_playlist`
+        WHERE `user_id` = #{userId}
+    </select>
+
+    <select id="getPlaylistById" resultMap="UserVideoPlaylistResultMap">
+        SELECT `id`, `user_id`, `name`, `description`, `creation_time`, `modifier_id`, `modification_time`
+        FROM `user_video_playlist`
+        WHERE `id` = #{id}
+    </select>
+
+    <select id="getPlaylistsByUserId" resultMap="UserVideoPlaylistWithVideoCountResultMap">
+        SELECT uvp.`id`, uvp.`user_id`, uvp.`name`, uvp.`description`, uvp.`creation_time`, uvp.`modifier_id`, uvp.`modification_time`,
+               COUNT(uvf.id) AS `video_count`
+        FROM `user_video_playlist` uvp
+                 LEFT JOIN user_video_favorites uvf
+                           ON uvp.`id` = uvf.`playlist_id`
+        WHERE uvp.user_id = 3
+        GROUP BY uvp.`id`, uvp.`user_id`, uvp.`name`, uvp.`description`, uvp.`creation_time`, uvp.`modifier_id`, uvp.`modification_time`
+    </select>
 </mapper>
