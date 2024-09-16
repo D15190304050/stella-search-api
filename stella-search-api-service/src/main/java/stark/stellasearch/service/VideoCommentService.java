@@ -98,21 +98,19 @@ public class VideoCommentService
 
     public ServiceResponse<Boolean> deleteComment(@Valid DeleteCommentsRequest request)
     {
+        long commentId = request.getId();
+
         // Validate if comment id exists
-        UserVideoComment commentInfo = videoCommentMapper.getCommentById(request.getId());
+        UserVideoComment commentInfo = videoCommentMapper.getCommentById(commentId);
         if (commentInfo == null)
-        {
-            return ServiceResponse.buildErrorResponse(-1, "Invalid video ID: " + request.getId());
-        }
+            return ServiceResponse.buildErrorResponse(-1, "Invalid video ID: " + commentId);
 
         // Validate if the current user id is the creator of the comment
         if (UserContextService.getCurrentUser().getId() != commentInfo.getCreatorId())
-        {
             return ServiceResponse.buildErrorResponse(-2, "You can not delete this comment because you are not the creator of the comment.");
-        }
 
         // Delete comment
-        videoCommentMapper.deleteCommentById(request.getId());
+        videoCommentMapper.deleteCommentById(commentId);
 
         return ServiceResponse.buildSuccessResponse(true);
     }
