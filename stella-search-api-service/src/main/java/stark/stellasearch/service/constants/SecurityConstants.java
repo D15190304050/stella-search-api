@@ -26,7 +26,7 @@ public class SecurityConstants
             {
                     "/connection/hello",
                     "/account/captcha",
-                    "/avatar/upload",
+                    "/avatar/*",
                     "/account/register",
                     "/account/validate-token",
                     "/video/cover/*",

@@ -6,7 +6,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 @Data
-public class PaginationParam
+public class PaginationRequestParam
 {
     @Min(value = 1, message = "Page capacity must be >= 1.")
     @Max(value = 100, message = "Page capacity must be <= 100.")

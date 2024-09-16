@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.domain.UserVideoComment;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.dto.results.VideoUploadingOption;
@@ -76,9 +75,9 @@ public class VideoController
     }
 
     @GetMapping("/list")
-    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@ModelAttribute PaginationParam paginationParam)
+    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@ModelAttribute PaginationRequestParam paginationRequestParam)
     {
-        return videoService.getVideoInfoOfCurrentUser(paginationParam);
+        return videoService.getVideoInfoOfCurrentUser(paginationRequestParam);
     }
 
     @GetMapping("/count")
