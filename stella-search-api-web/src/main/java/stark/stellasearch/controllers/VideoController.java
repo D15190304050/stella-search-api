@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/video")
@@ -45,7 +46,7 @@ public class VideoController
     }
 
     @PostMapping("/compose-chunks")
-    public ServiceResponse<Long> composeVideoChunks(@RequestBody ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    public ServiceResponse<Long> composeVideoChunks(@RequestBody ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, ExecutionException, InterruptedException
     {
         return videoService.composeVideoChunks(request);
     }
@@ -69,7 +70,7 @@ public class VideoController
     }
 
     @PostMapping("/set-info")
-    public ServiceResponse<Boolean> setVideoInfo(@RequestBody VideoInfoFormData request)
+    public ServiceResponse<Boolean> setVideoInfo(@RequestBody VideoInfoFormData request) throws ExecutionException, InterruptedException
     {
         return videoService.setVideoInfo(request);
     }

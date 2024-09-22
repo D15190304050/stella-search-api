@@ -14,6 +14,10 @@ spring:
             discovery:
 #                server-addr: localhost:8848
                 server-addr: localhost:13848
+    kafka:
+        bootstrap-servers: localhost:29092,localhost:39092,localhost:49092
+        consumer:
+            bootstrap-servers: localhost:29092,localhost:39092,localhost:49092
 
 dataworks:
     easy-minio:
@@ -23,6 +27,7 @@ dataworks:
         secret-key: minioadmin
         bucket-name-images: stella-images
         bucket-name-videos: stella-videos
+        bucket-name-video-subtitles: stella-video-subtitles
 
 images:
     avatar-url-prefix: http://localhost:${server.port}/avatar/
@@ -30,3 +35,6 @@ images:
 
 stella-search:
     jwt-secret: q4~@x2uC$f@M2x*^e5&DB^L!3~)6@+
+
+doubao:
+    model-endpoint: ep-20240917215653-hmx7x

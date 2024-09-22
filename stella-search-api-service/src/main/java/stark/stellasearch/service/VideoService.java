@@ -22,21 +22,25 @@ import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.VideoPlayRecord;
 import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.TopicSummaryVideoStartMessage;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
+import stark.stellasearch.service.kafka.ProducerService;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 @LogArgumentsAndResponse
 @Validated
-public class VideoService {
+public class VideoService
+{
     public static final String VIDEO_UPLOAD_TASK_ID_PREFIX = "videoUpload";
     public static final String VIDEO_CHUNK_COUNT_PREFIX = "chunkCount";
     public static final String VIDEO_CHUNK_SET_PLACEHOLDER = "-1";
@@ -46,6 +50,9 @@ public class VideoService {
 
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
+
+    @Value("${spring.kafka.producer.topic-summary-video-start}")
+    private String topicSummaryVideoStart;
 
     @Autowired
     private RedisQuickOperation redisQuickOperation;
@@ -65,6 +72,8 @@ public class VideoService {
     
     @Autowired
     private VideoPlayRecordMapper videoPlayRecordMapper;
+    @Autowired
+    private ProducerService producerService;
 
     private String generateTaskId(long userId)
     {
@@ -159,7 +168,8 @@ public class VideoService {
      * @throws XmlParserException
      * @throws InternalException
      */
-    public ServiceResponse<Long> composeVideoChunks(@Valid ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ServiceResponse<Long> composeVideoChunks(@Valid ComposeVideoChunksRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, ExecutionException, InterruptedException
+    {
         String taskId = request.getVideoUploadingTaskId();
         if (!redisQuickOperation.containsKey(taskId))
             return ServiceResponse.buildErrorResponse(-2, "Invalid video uploading task ID: " + taskId);
@@ -238,7 +248,8 @@ public class VideoService {
         return userVideoInfo.getId();
     }
 
-    private void resetExpirationOfUploadingTask(String taskId) {
+    private void resetExpirationOfUploadingTask(String taskId)
+    {
         redisQuickOperation.expire(taskId, 30, TimeUnit.MINUTES);
     }
 
@@ -248,7 +259,8 @@ public class VideoService {
      *
      * @param taskId
      */
-    private void clearUploadingTask(String taskId, List<String> sortedChunkNames) {
+    private void clearUploadingTask(String taskId, List<String> sortedChunkNames)
+    {
         // TODO: Clear the database record.
 
         lowPriorityTaskExecutor.execute(() ->
@@ -272,26 +284,49 @@ public class VideoService {
         });
     }
 
-    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request) {
+    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request) throws ExecutionException, InterruptedException
+    {
+        long videoId = request.getVideoId();
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
 
         String errorMessage = validateVideoLabels(request.getLabels());
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-2, errorMessage);
 
-        errorMessage = validateVideoInfoForInitialization(request.getVideoId(), userVideoInfoOutValue);
+        errorMessage = validateVideoInfoForInitialization(videoId, userVideoInfoOutValue);
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-2, errorMessage);
 
-        return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
+        ServiceResponse<Boolean> updatedVideoInfoResponse = updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
+        if (!updatedVideoInfoResponse.isSuccess())
+            return updatedVideoInfoResponse;
+
+        UserVideoInfo userVideoInfo = userVideoInfoMapper.getVideoBaseInfoById(videoId);
+        if (userVideoInfo == null)
+            return ServiceResponse.buildErrorResponse(-2, "Invalid video ID: " + videoId);
+
+        sendSummaryStartMessage(videoId, userVideoInfo.getNameInOss());
+
+        return ServiceResponse.buildSuccessResponse(true);
     }
 
-    private ServiceResponse<Boolean> updateVideoInfoResponse(VideoInfoFormData request, UserVideoInfo userVideoInfo) {
+    private void sendSummaryStartMessage(long videoId, String videoName) throws ExecutionException, InterruptedException
+    {
+        TopicSummaryVideoStartMessage message = new TopicSummaryVideoStartMessage();
+        message.setVideoId(videoId);
+        message.setVideoObjectName(videoName);
+        String messageContent = JsonSerializer.serialize(message);
+        producerService.sendMessage(topicSummaryVideoStart, messageContent);
+    }
+
+    private ServiceResponse<Boolean> updateVideoInfoResponse(VideoInfoFormData request, UserVideoInfo userVideoInfo)
+    {
         updateVideoInfo(request, userVideoInfo);
         return ServiceResponse.buildSuccessResponse(true);
     }
 
-    private void updateVideoInfo(VideoInfoFormData request, UserVideoInfo userVideoInfo) {
+    private void updateVideoInfo(VideoInfoFormData request, UserVideoInfo userVideoInfo)
+    {
         List<Long> labels = request.getLabels();
         labels.sort(Long::compareTo);
         String labelArrayText = JsonSerializer.serialize(labels);
@@ -306,7 +341,8 @@ public class VideoService {
         userVideoInfoMapper.updateVideoInfoById(userVideoInfo);
     }
 
-    private String validateVideoInfoForInitialization(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
+    private String validateVideoInfoForInitialization(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
         // Validations:
         // 1. The video with the specified ID exists.
         // 2. User uploaded this video.
@@ -328,11 +364,13 @@ public class VideoService {
         return null;
     }
 
-    private String validateVideoLabels(List<Long> labels) {
+    private String validateVideoLabels(List<Long> labels)
+    {
         if (CollectionUtils.isEmpty(labels))
             return "There are no video labels.";
 
-        for (Long label : labels) {
+        for (Long label : labels)
+        {
             if (label == null || label <= 0)
                 return "Invalid label ID: " + label + ". We only accept positive label IDs.";
         }
@@ -340,7 +378,8 @@ public class VideoService {
         return null;
     }
 
-    private String validateVideoInfoForCreator(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
+    private String validateVideoInfoForCreator(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
         // Validations:
         // 1. Video exists.
         // 2. Video creator ID = current user ID.
@@ -361,7 +400,8 @@ public class VideoService {
         return null;
     }
 
-    private String validateVideoInfoForUpdate(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
+    private String validateVideoInfoForUpdate(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
         // Validations:
         // 1. Video exists.
         // 2. Video creator ID = current user ID.
@@ -379,7 +419,8 @@ public class VideoService {
         return null;
     }
 
-    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationRequestParam request) {
+    public ServiceResponse<List<VideoPlayInfo>> getVideoInfoOfCurrentUser(@Valid PaginationRequestParam request)
+    {
         GetVideoInfosByUserIdQueryParam queryParam = new GetVideoInfosByUserIdQueryParam();
         queryParam.setUserId(UserContextService.getCurrentUser().getId());
         queryParam.setPaginationParam(request);
@@ -391,12 +432,14 @@ public class VideoService {
         return response;
     }
 
-    public ServiceResponse<Long> countVideoByUserId() {
+    public ServiceResponse<Long> countVideoByUserId()
+    {
         Long count = userVideoInfoMapper.countVideoByUserId(UserContextService.getCurrentUser().getId());
         return ServiceResponse.buildSuccessResponse(count);
     }
 
-    public ServiceResponse<Boolean> updateVideoInfo(@Valid VideoInfoFormData request) {
+    public ServiceResponse<Boolean> updateVideoInfo(@Valid VideoInfoFormData request)
+    {
         String errorMessage = validateVideoLabels(request.getLabels());
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-7, errorMessage);
@@ -409,7 +452,8 @@ public class VideoService {
         return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
     }
 
-    public ServiceResponse<VideoInfoFormData> getVideoInfoFormDataById(long videoId) {
+    public ServiceResponse<VideoInfoFormData> getVideoInfoFormDataById(long videoId)
+    {
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
         String errorMessage = validateVideoIdExistence(videoId, userVideoInfoOutValue);
         if (errorMessage != null)
@@ -419,7 +463,8 @@ public class VideoService {
         return ServiceResponse.buildSuccessResponse(request);
     }
 
-    private static VideoInfoFormData convertToVideoInfoFormData(UserVideoInfo userVideoInfo) {
+    private static VideoInfoFormData convertToVideoInfoFormData(UserVideoInfo userVideoInfo)
+    {
         String labelIds = userVideoInfo.getLabelIds();
         List<Long> labels = JsonSerializer.deserializeList(labelIds, Long.class);
         labels.sort(Long::compareTo);
@@ -437,7 +482,8 @@ public class VideoService {
         return formData;
     }
 
-    private String validateVideoIdExistence(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue) {
+    private String validateVideoIdExistence(long videoId, OutValue<UserVideoInfo> userVideoInfoOutValue)
+    {
         if (videoId <= 0)
             return "Invalid video ID: " + videoId;
 
@@ -449,7 +495,8 @@ public class VideoService {
         return null;
     }
 
-    public ServiceResponse<VideoPlayInfo> getVideoInfoById(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ServiceResponse<VideoPlayInfo> getVideoInfoById(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    {
         VideoPlayInfo videoPlayInfo = userVideoInfoMapper.getVideoPlayInfoById(videoId);
         if (videoPlayInfo == null)
             return ServiceResponse.buildErrorResponse(-7, "Invalid video ID: " + videoId);

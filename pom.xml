@@ -99,6 +99,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.volcengine</groupId>
+                <artifactId>volcengine-java-sdk-ark-runtime</artifactId>
+                <version>0.1.129</version>
+            </dependency>
+
+            <dependency>
                 <groupId>stark.dataworks</groupId>
                 <artifactId>dataworks-basic</artifactId>
                 <version>${dataworks.version}</version>

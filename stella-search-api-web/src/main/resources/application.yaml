@@ -19,12 +19,46 @@ spring:
         multipart:
             max-file-size: 50MB
             max-request-size: 50MB
+    kafka:
+        producer:
+            topic-summary-video-start: summary-video-start
+            batch-size: 16384
+            acks: all
+            retries: 3
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            buffer-memory: 33554432
+            client-id: stellaBackend
+            compression-type: none
+            properties:
+                retry.backoff.ms: 100
+                linger.ms: 0
+                max.request.size: 1048576
+                connections.max.idle.ms: 540000
+                receive.buffer.bytes: 32768
+                send.buffer.bytes: 131072
+                request.timeout.ms: 30000
+        consumer:
+            topic-summary-video-end: summary-video-end
+            session-timeout-ms: 30000
+            max-poll-interval-ms: 300000
+            auto-offset-reset: earliest
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            heartbeat-interval: 10000
+            max-poll-records: 1
+            auto-commit-interval: 1000
+            enable-auto-commit: false
+            group-id: stellaBackend
 
 mybatis:
     mapper-locations:
         - classpath:mappers/*.xml
 
 slice-byte-count: 5242880 # Maximum number of bytes in a chunk, could be changed in future version.
+
+doubao:
+    api-key-evn-variable-name: DOUBAO_API_KEY
 
 logging:
     pattern:
