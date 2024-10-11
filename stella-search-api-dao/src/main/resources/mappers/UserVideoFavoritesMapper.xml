@@ -41,4 +41,10 @@
         AND `user_id` = #{userId}
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
+    <select id="countVideoByPlaylistId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM `user_video_favorites`
+        WHERE `playlist_id` = #{playlistId}
+          AND `user_id` = #{userId}
+    </select>
 </mapper>

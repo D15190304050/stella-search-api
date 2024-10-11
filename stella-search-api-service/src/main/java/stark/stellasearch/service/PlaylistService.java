@@ -3,6 +3,7 @@ package stark.stellasearch.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoFavoritesMapper;
 import stark.stellasearch.dao.UserVideoInfoMapper;
@@ -140,22 +141,28 @@ public class PlaylistService
         return ServiceResponse.buildSuccessResponse(UserPlaylists);
     }
 
-    public ServiceResponse<List<UserVideoFavorites>> showFavoritesByPlaylist(@Valid ShowFavoritesByPlaylistRequest request)
+    public ServiceResponse<PaginatedData<UserVideoFavorites>> showFavoritesByPlaylist(@Valid ShowFavoritesByPlaylistRequest request)
     {
         // Validate if the playlist exists.
         UserVideoPlaylist playlist = userVideoPlaylistMapper.getPlaylistById(request.getPlaylistId());
         if (playlist == null)
             return ServiceResponse.buildErrorResponse(-1, "The playlist does not exist.");
 
+        long userId = UserContextService.getCurrentUser().getId();
         GetUserFavoritesByPlaylistIdParam favoritesByPlaylistIdParam = new GetUserFavoritesByPlaylistIdParam();
         favoritesByPlaylistIdParam.setPlaylistId(request.getPlaylistId());
         favoritesByPlaylistIdParam.setPaginationParam(request);
-        favoritesByPlaylistIdParam.setUserId(UserContextService.getCurrentUser().getId());
+        favoritesByPlaylistIdParam.setUserId(userId);
+        
         List<UserVideoFavorites> favoritesList = userVideoFavoritesMapper.getFavoritesByPlaylistId(favoritesByPlaylistIdParam);
-        ServiceResponse<List<UserVideoFavorites>> response = ServiceResponse.buildSuccessResponse(favoritesList);
+        long favoritesCount = userVideoFavoritesMapper.countVideoByPlaylistId(request.getPlaylistId(), userId);
+        PaginatedData<UserVideoFavorites> paginatedData = new PaginatedData<>();
+        paginatedData.setData(favoritesList);
+        paginatedData.setTotal(favoritesCount);
+
+        ServiceResponse<PaginatedData<UserVideoFavorites>> response = ServiceResponse.buildSuccessResponse(paginatedData);
         response.putExtra("total", favoritesList.size());
 
         return response;
     }
-
 }

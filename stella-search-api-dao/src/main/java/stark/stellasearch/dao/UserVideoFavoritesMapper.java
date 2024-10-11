@@ -14,4 +14,5 @@ public interface UserVideoFavoritesMapper
     int delete(@Param("videoId") long videoId, @Param("playlistId") long playlistId, @Param("userId") long userId);
     UserVideoFavorites getVideoByVideoIdAndPlaylistId(@Param("videoId") long videoId, @Param("playlistId") long playlistId, @Param("userId") long userId);
     List<UserVideoFavorites> getFavoritesByPlaylistId(GetUserFavoritesByPlaylistIdParam userFavoritesByPlaylistIdParam);
+    long countVideoByPlaylistId(@Param("playlistId") long playlistId, @Param("userId") long userId);
 }

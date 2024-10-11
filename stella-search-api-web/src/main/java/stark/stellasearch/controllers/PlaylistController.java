@@ -3,6 +3,7 @@ package stark.stellasearch.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.domain.UserVideoFavorites;
 import stark.stellasearch.domain.UserVideoPlaylist;
@@ -65,7 +66,7 @@ public class PlaylistController
     }
 
     @GetMapping("/show-favorites")
-    public ServiceResponse<List<UserVideoFavorites>> showFavoritesByPlaylist(@ModelAttribute ShowFavoritesByPlaylistRequest request)
+    public ServiceResponse<PaginatedData<UserVideoFavorites>> showFavoritesByPlaylist(@ModelAttribute ShowFavoritesByPlaylistRequest request)
     {
         return playlistService.showFavoritesByPlaylist(request);
     }
