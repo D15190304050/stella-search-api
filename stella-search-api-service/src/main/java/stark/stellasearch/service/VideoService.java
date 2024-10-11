@@ -500,9 +500,7 @@ public class VideoService
         // Validate if the video is liked before
         UserVideoLike userVideoLike = userVideoLikeMapper.getUserVideoLike(UserContextService.getCurrentUser().getId(), request.getVideoId());
         if (userVideoLike != null)
-        {
             return ServiceResponse.buildSuccessResponse(true);
-        }
 
         String errorMessage = insertVideoLike(request, videoPlayInfo);
         if (errorMessage != null)
@@ -562,15 +560,23 @@ public class VideoService
         return null;
     }
 
-    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@Valid SearchVideoRequest request)
+    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@Valid SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         String keyword = request.getKeyword();
+        long videoCountByKeyword = userVideoInfoMapper.countVideoByKeyword(keyword);
+        if (videoCountByKeyword == 0)
+            return ServiceResponse.buildSuccessResponse(new PaginatedData<>());
+
         GetVideoInfosByKeywordQueryParam queryParam = new GetVideoInfosByKeywordQueryParam();
         queryParam.setKeyword(keyword);
         queryParam.setPaginationParam(request);
 
         List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByKeyword(queryParam);
-        long videoCountByKeyword = userVideoInfoMapper.countVideoByKeyword(keyword);
+        for (VideoPlayInfo videoPlayInfo : videoPlayInfos)
+        {
+            String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
+            videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
+        }
 
         PaginatedData<VideoPlayInfo> paginatedData = new PaginatedData<>();
         paginatedData.setData(videoPlayInfos);

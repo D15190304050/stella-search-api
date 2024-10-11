@@ -118,7 +118,7 @@ public class VideoController
     }
 
     @GetMapping("/search-video")
-    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@ModelAttribute SearchVideoRequest request)
+    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@ModelAttribute SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         return videoService.searchVideo(request);
     }
