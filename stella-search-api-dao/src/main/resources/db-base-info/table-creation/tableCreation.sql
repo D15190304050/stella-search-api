@@ -221,3 +221,23 @@ CREATE TABLE `user_video_like`
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin
     COMMENT = 'Records of likes & dislikes of videos.';
+
+DROP TABLE IF EXISTS `user_following`;
+CREATE TABLE `user_following`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
+    `user_id`           BIGINT   NOT NULL COMMENT 'ID of the user who follows another user.',
+    `followed_user_id`  BIGINT   NOT NULL COMMENT 'ID of the user that is followed.',
+    `following_status`  TINYINT  NOT NULL DEFAULT 1 COMMENT 'Status of the following relationship: 0 - Unfollowing; 1 - Following; 2 - Blocked.',
+    `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_following_user_id` (`followed_user_id`)
+
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Records of following other users.';

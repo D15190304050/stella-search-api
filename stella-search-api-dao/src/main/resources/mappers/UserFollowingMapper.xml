@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stark.stellasearch.dao.UserFollowingMapper">
+    <insert id="insert">
+        INSERT INTO `user_following`
+        (`user_id`,
+         `followed_user_id`,
+         `following_status`,
+         `creator_id`,
+         `creation_time`,
+         `modifier_id`,
+         `modification_time`)
+        VALUES (#{userId},
+                #{followedUserId},
+                #{followingStatus},
+                #{creatorId},
+                #{creationTime},
+                #{modifierId},
+                #{modificationTime})
+    </insert>
+
+    <delete id="deleteByUserIdAndFollowedUserId">
+        DELETE
+        FROM `user_following`
+        WHERE `user_id` = #{userId}
+          AND `followed_user_id` = #{followedUserId}
+    </delete>
+
+    <select id="getByUserIDAndFollowedUserID" resultType="stark.stellasearch.domain.UserFollowing">
+        SELECT `id`,
+               `user_id`,
+               `followed_user_id`,
+               `following_status`,
+               `creator_id`,
+               `creation_time`,
+               `modifier_id`,
+               `modification_time`
+        FROM `user_following`
+        WHERE `user_id` = #{userId}
+          AND `followed_user_id` = #{followedUserId}
+
+    </select>
+</mapper>
