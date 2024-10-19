@@ -2,6 +2,7 @@ package stark.stellasearch.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 import stark.stellasearch.domain.UserVideoInfo;
+import stark.stellasearch.dto.params.GetVideoInfosByKeywordQueryParam;
 import stark.stellasearch.dto.params.GetVideoInfosByUserIdQueryParam;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 
@@ -17,4 +18,6 @@ public interface UserVideoInfoMapper
     UserVideoInfo getVideoBaseInfoById(long id);
     VideoPlayInfo getVideoPlayInfoById(long videoId);
     long countVideoById(long id);
+    List<VideoPlayInfo> getVideoPlayInfosByKeyword(GetVideoInfosByKeywordQueryParam getVideoInfosByKeywordQueryParam);
+    long countVideoByKeyword(String keyword);
 }
