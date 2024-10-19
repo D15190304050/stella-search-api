@@ -11,4 +11,40 @@
         <result property="modifierId" column="modifier_id"/>
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `user_video_favorites`
+        (`user_id`, `video_id`, `playlist_id`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`)
+        VALUES
+        (#{userId}, #{videoId}, #{playlistId}, #{creatorId}, #{creationTime}, #{modifierId}, #{modificationTime})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM `user_video_favorites`
+        WHERE `video_id` = #{videoId}
+        AND `playlist_id` = #{playlistId}
+        AND `user_id` = #{userId}
+    </delete>
+
+    <select id="getVideoByVideoIdAndPlaylistId" resultMap="BaseResultMap" >
+        SELECT `id`, `user_id`, `video_id`, `playlist_id`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`
+        FROM `user_video_favorites`
+        WHERE `video_id` = #{videoId}
+        AND `playlist_id` = #{playlistId}
+        AND `user_id` = #{userId}
+    </select>
+
+    <select id="getFavoritesByPlaylistId" resultMap="BaseResultMap">
+        SELECT `id`, `user_id`, `video_id`, `playlist_id`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`
+        FROM `user_video_favorites`
+        WHERE `playlist_id` = #{playlistId}
+        AND `user_id` = #{userId}
+        LIMIT #{pageCapacity} OFFSET #{offset}
+    </select>
+    <select id="countVideoByPlaylistId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM `user_video_favorites`
+        WHERE `playlist_id` = #{playlistId}
+          AND `user_id` = #{userId}
+    </select>
 </mapper>
