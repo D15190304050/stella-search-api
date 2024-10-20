@@ -22,14 +22,10 @@ public class LoginFailureJsonHandler implements AuthenticationFailureHandler
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException
     {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
         String exceptionInfo = ExceptionInfoFormatter.formatMessageAndStackTrace(exception);
         log.error("Login failure: {}", exceptionInfo);
 
         ServiceResponse<LoginStateToken> loginResult = ServiceResponse.buildErrorResponse(-1, exceptionInfo);
-        String resultJson = JsonSerializer.serialize(loginResult);
-        response.getWriter().println(resultJson);
-        response.flushBuffer();
+        loginResult.writeToResponse(response);
     }
 }

@@ -21,13 +21,7 @@ public class LogoutSuccessJsonHandler implements LogoutSuccessHandler
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException
     {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
         ServiceResponse<Boolean> logoutResponse = ServiceResponse.buildSuccessResponse(true, SecurityConstants.LOGOUT_SUCCESS);
-
-        String s = JsonSerializer.serialize(logoutResponse);
-        log.info("Logout success message = {}", s);
-        response.getWriter().println(s);
-        response.flushBuffer();
+        logoutResponse.writeToResponse(response);
     }
 }
