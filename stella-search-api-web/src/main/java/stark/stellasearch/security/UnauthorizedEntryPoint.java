@@ -18,9 +18,6 @@ public class UnauthorizedEntryPoint implements AuthenticationEntryPoint
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException
     {
         ServiceResponse<Object> serviceResponse = ServiceResponse.buildErrorResponse(CommonErrorResponses.NOT_LOGIN);
-        response.setStatus(HttpStatus.OK.value());
-//        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.getWriter().println(JsonSerializer.serialize(serviceResponse));
-        response.flushBuffer();
+        serviceResponse.writeToResponse(response);
     }
 }

@@ -51,12 +51,7 @@ public class TokenLoginFilter extends OncePerRequestFilter
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException
     {
-        String requestURI = request.getRequestURI();
-        if (ignoreUris.contains(requestURI))
-        {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        // Parse the login state if there is a token, no matter if it is a login state required Uri.
 
         String token = TokenHandler.getToken(request, SecurityConstants.SSO_COOKIE_NAME);
 
