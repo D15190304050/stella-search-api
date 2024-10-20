@@ -7,9 +7,18 @@ import stark.stellasearch.service.dto.User;
 
 public class UserContextService
 {
+    private static final User ANONYMOUS_USER;
+
+    static
+    {
+        ANONYMOUS_USER = new User();
+        ANONYMOUS_USER.setUsername("anonymous");
+        ANONYMOUS_USER.setPassword("anonymous");
+        ANONYMOUS_USER.setId(-1);
+    }
+
     private UserContextService()
     {
-
     }
 
     public static void setAuthentication(UsernamePasswordAuthenticationToken authenticationToken)
@@ -22,8 +31,16 @@ public class UserContextService
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
+    /**
+     * Returns the currently logged-in user or anonymous user if there is no login state.
+     * @return The currently logged-in user or anonymous user if there is no login state.
+     */
     public static User getCurrentUser()
     {
-        return (User) getAuthentication().getPrincipal();
+        Object principal = getAuthentication().getPrincipal();
+        if (principal instanceof User user)
+            return user;
+
+        return ANONYMOUS_USER;
     }
 }

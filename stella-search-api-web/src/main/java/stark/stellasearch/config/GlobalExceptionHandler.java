@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import stark.dataworks.boot.ExceptionLogger;
 import stark.dataworks.boot.web.ServiceResponse;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler

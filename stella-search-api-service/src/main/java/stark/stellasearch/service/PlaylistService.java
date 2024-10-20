@@ -14,7 +14,7 @@ import stark.stellasearch.domain.UserVideoPlaylist;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.PlaylistWithVideoCount;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.List;
 

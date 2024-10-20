@@ -2,7 +2,7 @@ package stark.stellasearch.dto.params;
 
 import lombok.Data;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 @Data
 public class AddVideoToPlaylistRequest

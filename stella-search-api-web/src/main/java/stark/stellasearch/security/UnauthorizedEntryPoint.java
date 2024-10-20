@@ -7,9 +7,9 @@ import stark.dataworks.basic.data.json.JsonSerializer;
 import stark.dataworks.boot.web.CommonErrorResponses;
 import stark.dataworks.boot.web.ServiceResponse;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class UnauthorizedEntryPoint implements AuthenticationEntryPoint

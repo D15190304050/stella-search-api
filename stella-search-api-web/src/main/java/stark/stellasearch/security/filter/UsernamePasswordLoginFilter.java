@@ -13,8 +13,8 @@ import stark.dataworks.boot.ExceptionLogger;
 import stark.stellasearch.service.constants.SecurityConstants;
 import stark.stellasearch.service.dto.LoginInfo;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class UsernamePasswordLoginFilter extends UsernamePasswordAuthenticationFilter

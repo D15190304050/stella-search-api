@@ -21,7 +21,7 @@ import stark.stellasearch.service.constants.Genders;
 import stark.stellasearch.service.constants.PhoneNumberPrefixes;
 import stark.stellasearch.service.dto.User;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;

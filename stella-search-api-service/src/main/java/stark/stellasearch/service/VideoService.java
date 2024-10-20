@@ -26,7 +26,7 @@ import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

@@ -14,9 +14,9 @@ import stark.stellasearch.service.constants.SecurityConstants;
 import stark.stellasearch.service.dto.User;
 import stark.stellasearch.service.redis.StellaRedisOperation;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j

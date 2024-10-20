@@ -6,10 +6,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -26,22 +32,19 @@ import stark.stellasearch.service.redis.StellaRedisOperation;
 
 @Slf4j
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter
+public class SecurityConfig
 {
     @Value("")
     private String contextPath;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtService jwtService;
 
     @Autowired
     private RedisQuickOperation redisQuickOperation;
-
-    @Autowired
-    private JdbcTokenRepositoryImpl tokenRepository;
-
-    @Autowired
-    private RememberMeServices rememberMeServices;
 
     @Autowired
     private LoginSuccessJsonHandler loginSuccessJsonHandler;
@@ -64,66 +67,68 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Autowired
     private RedisKeyManager redisKeyManager;
 
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception
-    {
-        return super.authenticationManagerBean();
-    }
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
 
     public UsernamePasswordLoginFilter usernamePasswordLoginFilter() throws Exception
     {
         UsernamePasswordLoginFilter loginFilter = new UsernamePasswordLoginFilter();
-        loginFilter.setAuthenticationManager(authenticationManagerBean());
-        loginFilter.setRememberMeServices(rememberMeServices); // Set the "RememberMeServices" for authentication success.
+        loginFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
+//        loginFilter.setRememberMeServices(rememberMeServices); // Set the "RememberMeServices" for authentication success.
         loginFilter.setAuthenticationSuccessHandler(loginSuccessJsonHandler); // Handler for authentication success.
         loginFilter.setAuthenticationFailureHandler(loginFailureJsonHandler); // Handler for authentication failure.
         loginFilter.setFilterProcessesUrl(SecurityConstants.DEFAULT_LOGIN_URI);
         return loginFilter;
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder builder) throws Exception
-    {
-        builder.userDetailsService(daoUserDetailService);
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(daoUserDetailService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception
+//    protected void configure(AuthenticationManagerBuilder builder) throws Exception
+//    {
+//        builder.userDetailsService(daoUserDetailService);
+//    }
+
+    @Bean
+    protected SecurityFilterChain configure(HttpSecurity http) throws Exception
     {
-        http.authorizeRequests()
-            .mvcMatchers(SecurityConstants.NON_AUTHENTICATE_URIS)
-            .permitAll()
-            .anyRequest()
-            .authenticated()
-            .and()
-            .rememberMe()
-            .alwaysRemember(true)
-            .rememberMeServices(rememberMeServices)
-            .tokenRepository(tokenRepository)
-            .and()
-            .exceptionHandling()
-            .authenticationEntryPoint(new UnauthorizedEntryPoint())
-            .accessDeniedHandler(new NoPermissionHandler())
-            .and()
-            .formLogin()
-            .successHandler(loginSuccessJsonHandler)
-            .failureHandler(loginFailureJsonHandler)
-            .and()
-            .logout()
-            .logoutUrl(SecurityConstants.DEFAULT_LOGOUT_URI)
-            .logoutSuccessHandler(logoutSuccessJsonHandler)
-            .and()
-            .cors()
-            .configurationSource(corsConfigurationSource)
-            .and()
-            .csrf()
-            .disable() // Should be enabled.
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        ;
+        http.authorizeHttpRequests(request ->
+            {
+                request.requestMatchers(SecurityConstants.NON_AUTHENTICATE_URIS).permitAll();
+                request.anyRequest().authenticated();
+            })
+            .rememberMe(customizer ->
+            {
+                customizer.alwaysRemember(true);
+//                customizer.rememberMeServices(rememberMeServices);
+            })
+            .exceptionHandling(customizer ->
+            {
+                customizer.authenticationEntryPoint(new UnauthorizedEntryPoint());
+                customizer.accessDeniedHandler(new NoPermissionHandler());
+            })
+            .formLogin(customizer ->
+            {
+                customizer.successHandler(loginSuccessJsonHandler);
+                customizer.failureHandler(loginFailureJsonHandler);
+            })
+            .logout(customizer ->
+            {
+                customizer.logoutUrl(SecurityConstants.DEFAULT_LOGOUT_URI);
+                customizer.logoutSuccessHandler(logoutSuccessJsonHandler);
+            })
+            .cors(customizer -> customizer.configurationSource(corsConfigurationSource))
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(new TokenLoginFilter(jwtService, redisQuickOperation, daoUserDetailService, stellaRedisOperation, contextPath, redisKeyManager), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(usernamePasswordLoginFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }

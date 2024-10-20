@@ -13,7 +13,7 @@ import stark.stellasearch.service.ImageService;
 import stark.stellasearch.service.VideoService;
 import stark.stellasearch.service.VideoUploadingOptionHolder;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
