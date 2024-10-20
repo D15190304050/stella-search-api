@@ -2,7 +2,6 @@ package stark.stellasearch.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -26,14 +25,8 @@ import stark.stellasearch.service.redis.StellaRedisOperation;
 
 @Slf4j
 @Configuration
-public class SecurityConfig
+public class SecurityConfiguration
 {
-    @Value("")
-    private String contextPath;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Autowired
     private JwtService jwtService;
 
@@ -75,15 +68,6 @@ public class SecurityConfig
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider()
-    {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(daoUserDetailService);
-        authProvider.setPasswordEncoder(passwordEncoder);
-        return authProvider;
-    }
-
-    @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception
     {
         http.authorizeHttpRequests(request ->
@@ -111,7 +95,7 @@ public class SecurityConfig
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.addFilterBefore(new TokenLoginFilter(jwtService, redisQuickOperation, daoUserDetailService, stellaRedisOperation, contextPath, redisKeyManager), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new TokenLoginFilter(jwtService, redisQuickOperation, daoUserDetailService, stellaRedisOperation, redisKeyManager), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAt(usernamePasswordLoginFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

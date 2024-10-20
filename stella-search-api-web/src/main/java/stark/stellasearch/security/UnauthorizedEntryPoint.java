@@ -15,7 +15,7 @@ import java.io.IOException;
 public class UnauthorizedEntryPoint implements AuthenticationEntryPoint
 {
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException
     {
         ServiceResponse<Object> serviceResponse = ServiceResponse.buildErrorResponse(CommonErrorResponses.NOT_LOGIN);
         serviceResponse.writeToResponse(response);
