@@ -10,7 +10,7 @@ import stark.stellasearch.service.CaptchaService;
 import stark.stellasearch.dto.results.CaptchaResponse;
 import stark.stellasearch.dto.results.LoginState;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j

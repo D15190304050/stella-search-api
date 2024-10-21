@@ -5,8 +5,8 @@ import lombok.Data;
 import jakarta.validation.constraints.Min;
 
 @Data
-public class DeleteCommentsRequest
+public class DeletePlaylistRequest
 {
-    @Min(value = 1, message = "Minimum video ID is 1.")
+    @Min(value = 1, message = "Minimum playlist ID is 1.")
     private long id;
 }

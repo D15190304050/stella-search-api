@@ -153,7 +153,7 @@ CREATE TABLE `user_video_playlist`
     `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the record.',
     `user_id`           BIGINT       NOT NULL COMMENT 'ID of the user who owns the playlist.',
     `name`              VARCHAR(255) NOT NULL COMMENT 'Name of the playlist.',
-    `creator_id`        BIGINT       NOT NULL COMMENT 'ID of the creator of the record.',
+    `description`       VARCHAR(500) NOT NULL COMMENT 'Description of the playlist.',
     `creation_time`     DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
     `modifier_id`       BIGINT       NOT NULL COMMENT 'ID of the user who modifies the record.',
     `modification_time` DATETIME     NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',

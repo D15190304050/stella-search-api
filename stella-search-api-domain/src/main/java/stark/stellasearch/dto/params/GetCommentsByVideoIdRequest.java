@@ -3,7 +3,7 @@ package stark.stellasearch.dto.params;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

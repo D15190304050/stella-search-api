@@ -4,6 +4,7 @@ import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.VideoPlayInfo;
@@ -12,7 +13,7 @@ import stark.stellasearch.service.ImageService;
 import stark.stellasearch.service.VideoService;
 import stark.stellasearch.service.VideoUploadingOptionHolder;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -114,5 +115,11 @@ public class VideoController
     public ServiceResponse<Boolean> cancelLikeVideo(@RequestBody CancelLikeVideoRequest request)
     {
         return videoService.cancelLikeVideo(request);
+    }
+
+    @GetMapping("/search-video")
+    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@ModelAttribute SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    {
+        return videoService.searchVideo(request);
     }
 }

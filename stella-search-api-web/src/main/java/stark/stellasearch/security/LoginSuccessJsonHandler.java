@@ -14,9 +14,9 @@ import stark.stellasearch.service.constants.SecurityConstants;
 import stark.stellasearch.service.dto.User;
 import stark.stellasearch.service.redis.StellaRedisOperation;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
@@ -51,16 +51,9 @@ public class LoginSuccessJsonHandler implements AuthenticationSuccessHandler
         String redirectUrl = redirectUrlAttribute == null ? null : (String) redirectUrlAttribute;
         log.info("redirectUrl = {}", redirectUrl);
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
         LoginStateToken loginStateToken = generateLoginStateToken(user);
-
         ServiceResponse<LoginStateToken> loginSuccessResponse = ServiceResponse.buildSuccessResponse(loginStateToken, SecurityConstants.LOGIN_SUCCESS);
-        String resultJson = JsonSerializer.serialize(loginSuccessResponse);
-        log.info("Login success message = {}", resultJson);
-        response.getWriter().println(resultJson);
-
-        response.flushBuffer();
+        loginSuccessResponse.writeToResponse(response);
     }
 
     // TODO: Move this method to another class after integration of other login methods.
@@ -73,15 +66,8 @@ public class LoginSuccessJsonHandler implements AuthenticationSuccessHandler
     private LoginStateToken generateLoginStateToken(User user)
     {
         String token = jwtService.createToken(user);
-
         LoginStateToken loginStateToken = new LoginStateToken();
-
-//        loginStateToken.setId(user.getId());
-//        loginStateToken.setUsername(user.getUsername());
-//        loginStateToken.setNickname(user.getNickname());
-//        loginStateToken.setAvatarUrl(user.getAvatarUrl());
         loginStateToken.setAccessToken(token);
-
         return loginStateToken;
     }
 }

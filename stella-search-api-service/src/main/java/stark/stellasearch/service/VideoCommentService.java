@@ -15,7 +15,7 @@ import stark.stellasearch.dto.params.GetCommentsByVideoIdQueryParam;
 import stark.stellasearch.dto.params.GetCommentsByVideoIdRequest;
 import stark.stellasearch.dto.results.VideoCommentInfo;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
