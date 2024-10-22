@@ -4,9 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
+import stark.stellasearch.dto.params.CheckIfFollowingRequest;
+import stark.stellasearch.dto.params.GetUserFollowingListRequest;
 import stark.stellasearch.dto.params.UserFollowingRequest;
 import stark.stellasearch.dto.params.UserUnfollowingRequest;
+import stark.stellasearch.dto.results.UserFollowingInfo;
 import stark.stellasearch.service.UserFollowingService;
 
 @Slf4j
@@ -16,11 +20,11 @@ import stark.stellasearch.service.UserFollowingService;
 public class UserFollowingController
 {
     // TODO:
-    // 1. 关注用户
-    // 2. 取消关注用户
-    // 3. 获取用户的关注列表
-    // 4. 获取用户的粉丝列表
-    // 5. 判断用户是否关注了另一个用户
+    // 1. Follow another user.
+    // 2. Unfollow another user.
+    // 3. Get the user's following list.
+    // 4. Get the user's follower list.
+    // 5. Check if the current user is following another user.
     @Autowired
     private UserFollowingService userFollowingService;
 
@@ -34,5 +38,23 @@ public class UserFollowingController
     public ServiceResponse<Boolean> userUnfollowing(@RequestBody UserUnfollowingRequest request)
     {
         return userFollowingService.unfollow(request);
+    }
+
+    @GetMapping("/following-list")
+    public ServiceResponse<PaginatedData<UserFollowingInfo>> getFollowingList(@ModelAttribute GetUserFollowingListRequest request)
+    {
+        return userFollowingService.getFollowingList(request);
+    }
+
+    @GetMapping("/follower-list")
+    public ServiceResponse<PaginatedData<UserFollowingInfo>> getFollowerList(@ModelAttribute GetUserFollowingListRequest request)
+    {
+        return userFollowingService.getFollowerList(request);
+    }
+
+    @GetMapping("/if-following")
+    public ServiceResponse<Boolean> ifFollowing(@ModelAttribute CheckIfFollowingRequest request)
+    {
+        return userFollowingService.ifFollowing(request);
     }
 }

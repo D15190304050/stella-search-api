@@ -2,7 +2,7 @@ package stark.stellasearch.dto.results;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.Date;
 
 @Data
 public class UserFollowingInfo
@@ -11,6 +11,7 @@ public class UserFollowingInfo
     private String username;
     private String nickname;
     private String avatarUrl;
+    private Date followingTime;
     private long followingCount;
     private long followerCount;
 }

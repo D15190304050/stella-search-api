@@ -19,13 +19,14 @@ import java.util.List;
 public class PlaylistController
 {
     // TODO: Implement playlist controller
-    // 1. 将视频加入收藏夹(默认收藏夹)--
-    // 2. 将视频从收藏夹中移除--
-    // 3. 添加收藏夹--
-    // 4. 删除收藏夹（连同删除视频）--
-    // 5. 修改收藏夹信息--
-    // 6. 展示收藏夹列表--
-    // 7. 展示收藏夹中的视频列表--
+    // 1. Put a video into a playlist.
+    // 2. Remove a video from a playlist.
+    // 3. Create a new playlist.
+    // 4. Delete a playlist with videos.
+    // 5. Modify a playlist.
+    // 6. List all playlists.
+    // 7. Show favorites by playlist.
+
     @Autowired
     private PlaylistService playlistService;
 
