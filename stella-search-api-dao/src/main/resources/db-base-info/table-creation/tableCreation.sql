@@ -45,18 +45,18 @@ CREATE TABLE `video_uploading_task`
 DROP TABLE IF EXISTS `user_video_info`;
 CREATE TABLE `user_video_info`
 (
-    `id`                 BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video.',
-    `name_in_oss` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Name of the corresponding object in OSS.',
-    `title`              VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'Title of the video.',
-    `cover_url`          VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'URL of the cover of the video.',
-    `creation_type_id`   BIGINT COMMENT 'Creation type of the video: 0 - Original; 1 - Reprint.',
-    `section_id`         BIGINT COMMENT 'ID of the section that the video belongs to.',
-    `label_ids`          VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Labels of the video, separated by ",", e.g., "Game,Challenge".',
-    `introduction`       VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Introduction to the video.',
-    `creator_id`         BIGINT                                                 NOT NULL COMMENT 'ID of the user who uploads the video.',
-    `creation_time`      DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
-    `modifier_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
-    `modification_time`  DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.',
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video.',
+    `name_in_oss`       VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Name of the corresponding object in OSS.',
+    `title`             VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'Title of the video.',
+    `cover_url`         VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'URL of the cover of the video.',
+    `creation_type_id`  BIGINT COMMENT 'Creation type of the video: 0 - Original; 1 - Reprint.',
+    `section_id`        BIGINT COMMENT 'ID of the section that the video belongs to.',
+    `label_ids`         VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Labels of the video, separated by ",", e.g., "Game,Challenge".',
+    `introduction`      VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Introduction to the video.',
+    `creator_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the user who uploads the video.',
+    `creation_time`     DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
+    `modifier_id`       BIGINT                                                 NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
+    `modification_time` DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.',
     KEY `idx_creator_id` (`creator_id`),
     KEY `idx_section_id` (`section_id`)
 )
@@ -221,3 +221,21 @@ CREATE TABLE `user_video_like`
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin
     COMMENT = 'Records of likes & dislikes of videos.';
+
+DROP TABLE IF EXISTS `user_blacklist`;
+CREATE TABLE `user_blacklist`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the user blacklist record.',
+    `user_id`           BIGINT   NOT NULL COMMENT 'User ID of the person initiating the block.',
+    `blocked_user_id`   BIGINT   NOT NULL COMMENT 'User ID of the person being blocked.',
+    `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_blocked_user_id` (`blocked_user_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Records of user blacklist info.';
