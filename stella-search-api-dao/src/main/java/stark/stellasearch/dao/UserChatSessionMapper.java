@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper
 public interface UserChatSessionMapper
 {
-    UserChatSession insert(UserChatSession userChatSession);
+    int insert(UserChatSession userChatSession);
     UserChatSessionInfo getSessionInfoWithLastMessageById(long id);
     List<UserChatSessionInfo> getAllSessionsByUserId(GetUserChatSessionListQueryParam queryParam);
     int deleteById(long id);

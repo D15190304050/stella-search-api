@@ -10,7 +10,24 @@
                 #{modificationTime})
     </insert>
 
-    <select id="getMessagesBySessionId" resultType="stark.stellasearch.domain.UserChatMessage">
+    <delete id="deleteMessagesBySessionId">
+        DELETE FROM `user_chat_message`
+        WHERE `session_id` = #{sessionId}
+    </delete>
+
+    <resultMap id="UserChatMessageMap" type="stark.stellasearch.domain.UserChatMessage">
+        <result property="id" column="id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="recipientId" column="recipient_id"/>
+        <result property="content" column="content"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <select id="getMessagesBySessionId" resultMap="UserChatMessageMap">
         SELECT `id`,
                `session_id`,
                `sender_id`,

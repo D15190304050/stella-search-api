@@ -12,4 +12,5 @@ public interface UserChatMessageMapper
     int insert(UserChatMessage userChatMessage);
     List<UserChatMessage> getMessagesBySessionId(GetUserChatMessageQueryParam queryParam);
     long countMessagesBySessionId(long sessionId);
+    int deleteMessagesBySessionId(long sessionId);
 }

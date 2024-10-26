@@ -32,25 +32,25 @@ public class UserChatController
     @Autowired
     private UserChatMessageService userChatMessageService;
 
-    @PostMapping("session/create")
+    @PostMapping("/session/create")
     public ServiceResponse<UserChatSession> createChatSession(@RequestBody CreateUserChatSessionRequest request)
     {
         return userChatSessionService.createChatSession(request);
     }
 
-    @GetMapping("session/{sessionId}")
+    @GetMapping("/session/{sessionId}")
     public ServiceResponse<UserChatSessionInfo> getChatSession(@PathVariable("sessionId") long sessionId)
     {
         return userChatSessionService.getChatSession(sessionId);
     }
 
-    @GetMapping("session/list")
+    @GetMapping("/session/list")
     public ServiceResponse<PaginatedData<UserChatSessionInfo>> getChatSessionList(@ModelAttribute GetUserChatSessionListRequest request)
     {
         return userChatSessionService.getChatSessionList(request);
     }
 
-    @PostMapping("session/delete")
+    @PostMapping("/session/delete")
     public ServiceResponse<Boolean> deleteChatSession(@RequestBody DeleteUserChatSessionRequest request)
     {
         return userChatSessionService.deleteChatSession(request);
@@ -62,8 +62,8 @@ public class UserChatController
         return userChatMessageService.sendMessages(request);
     }
 
-    @GetMapping("message/{sessionId}")
-    public ServiceResponse<PaginatedData<UserChatMessage>> getMessages(@PathVariable("sessionId") long sessionId, PaginationRequestParam paginationRequestParam)
+    @GetMapping("/message/{sessionId}")
+    public ServiceResponse<PaginatedData<UserChatMessage>> getMessagesBySessionId(@PathVariable("sessionId") long sessionId, PaginationRequestParam paginationRequestParam)
     {
         return userChatMessageService.getMessagesBySessionId(sessionId, paginationRequestParam);
     }

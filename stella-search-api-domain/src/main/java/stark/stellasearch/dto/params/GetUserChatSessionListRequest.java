@@ -5,5 +5,6 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class GetUserChatSessionListRequest extends PaginationRequestParam{
+public class GetUserChatSessionListRequest extends PaginationRequestParam
+{
 }

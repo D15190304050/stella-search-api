@@ -35,7 +35,7 @@
         FROM (SELECT `id`, `user1_id`, `user2_id`, `status`
               FROM `user_chat_session`
               WHERE `id` = #{id}) ucs
-                 INNER JOIN (SELECT `id`, `session_id`, `creation_time`, `content`, `sender_id`
+                 LEFT JOIN (SELECT `id`, `session_id`, `creation_time`, `content`, `sender_id`
                              FROM `user_chat_message` u
                              WHERE u.`session_id` = #{id}
                              ORDER BY `id` DESC
@@ -55,14 +55,14 @@
               FROM `user_chat_session`
               WHERE `user1_id` = #{userId}
                  OR `user2_id` = #{userId}) ucs
-                 INNER JOIN (SELECT `id`, `session_id`, `creation_time`, `content`, `sender_id`
-                             FROM `user_chat_message`
-                             WHERE `id` IN (SELECT MAX(`id`)
-                                            FROM `user_chat_message`
-                                            GROUP BY `session_id`)
-                             ORDER BY `session_id`) ucm
-                            ON ucs.`id` = ucm.`session_id`
-            LIMIT #{pageCapacity} OFFSET #{offset}
+                 LEFT JOIN (SELECT `id`, `session_id`, `creation_time`, `content`, `sender_id`
+                            FROM `user_chat_message`
+                            WHERE `id` IN (SELECT MAX(`id`)
+                                           FROM `user_chat_message`
+                                           GROUP BY `session_id`)) ucm
+                           ON ucs.`id` = ucm.`session_id`
+            LIMIT #{pageCapacity}
+        OFFSET #{offset}
     </select>
 
     <select id="countAllSessionsByUserId" resultType="java.lang.Long">
@@ -72,7 +72,18 @@
            OR `user2_id` = #{userId}
     </select>
 
-    <select id="getSessionByUserIds" resultType="stark.stellasearch.domain.UserChatSession">
+    <resultMap id="UserChatSessionMap" type="stark.stellasearch.domain.UserChatSession">
+        <result property="id" column="id"/>
+        <result property="user1Id" column="user1_id"/>
+        <result property="user2Id" column="user2_id"/>
+        <result property="status" column="status"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <select id="getSessionByUserIds" resultMap="UserChatSessionMap">
         SELECT `id`,
                `user1_id`,
                `user2_id`,

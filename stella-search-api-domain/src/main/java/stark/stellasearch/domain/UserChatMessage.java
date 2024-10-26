@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class UserChatMessage extends DomainBase
 {
-    private long id;
     private long sessionId;
     private long senderId;
     private long recipientId;
