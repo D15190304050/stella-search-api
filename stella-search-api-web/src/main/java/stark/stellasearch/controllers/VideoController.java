@@ -102,7 +102,7 @@ public class VideoController
     @GetMapping("/play")
     public ServiceResponse<VideoPlayInfo> getVideoInfoById(@RequestParam("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
-        return videoService.getVideoInfoById(videoId);
+        return videoService.getVideoPlayInfoById(videoId);
     }
 
     @PostMapping("/like")

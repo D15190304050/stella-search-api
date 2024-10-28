@@ -6,7 +6,7 @@ import stark.stellasearch.domain.UserVideoLike;
 @Mapper
 public interface UserVideoLikeMapper
 {
-    UserVideoLike getUserVideoLike(long userId, long videoId);
+    long countUserVideoLike(long userId, long videoId);
     int insertLike(UserVideoLike userVideoLike);
     int deleteLike(long userId, long videoId);
 }
