@@ -132,6 +132,7 @@
         ON uvi.`id` = uvc.`video_id`
         WHERE uvi.`creator_id` = #{userId}
           AND uvi.`title` IS NOT NULL
+        ORDER BY `creation_time` DESC
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
     

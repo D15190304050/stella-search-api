@@ -11,15 +11,21 @@
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
 
-    <resultMap id="UserVideoPlaylistWithVideoCountResultMap" type="stark.stellasearch.dto.results.PlaylistWithVideoCount">
+    <resultMap id="UserVideoPlaylistWithVideoCountResultMap" type="stark.stellasearch.dto.results.PlaylistInfo">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="name" column="name"/>
         <result property="description" column="description"/>
-        <result property="creationTime" column="creation_time"/>
-        <result property="modifierId" column="modifier_id"/>
-        <result property="modificationTime" column="modification_time"/>
         <result property="videoCount" column="video_count"/>
+    </resultMap>
+
+    <resultMap id="PlaylistWithVideoCheckResultMap" type="stark.stellasearch.dto.results.PlaylistWithVideoCheck">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="videoId" column="video_id" />
+        <result property="name" column="name" />
+        <result property="description" column="description" />
+        <result property="containsVideo" column="contains_video" />
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -45,7 +51,7 @@
         WHERE uvp.id = #{id}
     </delete>
 
-    <select id="countPlaylistByUserId" resultType="java.lang.Integer">
+    <select id="countPlaylistByUserId" resultType="long">
         SELECT COUNT(*)
         FROM `user_video_playlist`
         WHERE `user_id` = #{userId}
@@ -57,13 +63,54 @@
         WHERE `id` = #{id}
     </select>
 
+    <select id="countPlaylistById" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_playlist`
+        WHERE `id` = #{id}
+    </select>
+
+    <select id="getPlaylistIdsByUserId" resultType="long">
+        SELECT `id`
+        FROM `user_video_playlist`
+        WHERE `user_id` = #{userId}
+    </select>
+
     <select id="getPlaylistsByUserId" resultMap="UserVideoPlaylistWithVideoCountResultMap">
         SELECT uvp.`id`, uvp.`user_id`, uvp.`name`, uvp.`description`, uvp.`creation_time`, uvp.`modifier_id`, uvp.`modification_time`,
                COUNT(uvf.id) AS `video_count`
         FROM `user_video_playlist` uvp
                  LEFT JOIN user_video_favorites uvf
                            ON uvp.`id` = uvf.`playlist_id`
-        WHERE uvp.user_id = 3
+        WHERE uvp.`user_id` = #{userId}
         GROUP BY uvp.`id`, uvp.`user_id`, uvp.`name`, uvp.`description`, uvp.`creation_time`, uvp.`modifier_id`, uvp.`modification_time`
+    </select>
+
+    <select id="getPlaylistWithVideoChecks" resultMap="PlaylistWithVideoCheckResultMap">
+        SELECT uvp.`id`,
+               #{userId}  AS `user_id`,
+               #{videoId} AS `video_id`,
+               uvp.`name`,
+               uvp.`description`,
+               IFNULL(uvf.video_count, 0) = 1 AS `contains_video`
+        FROM
+        (
+            SELECT *
+            FROM `user_video_playlist`
+            WHERE `user_id` = #{userId}
+        ) uvp
+        LEFT JOIN
+        (
+            SELECT
+                `user_id`,
+                `playlist_id`,
+                `video_id`,
+                COUNT(*) AS video_count
+            FROM `user_video_favorites`
+            WHERE `user_id` = #{userId}
+              AND `video_id` = #{videoId}
+            GROUP BY `user_id`, `playlist_id`, `video_id`
+        ) uvf
+        ON uvp.`user_id` = uvf.`user_id` AND uvp.`id` = uvf.`playlist_id`
+        GROUP BY uvp.`id`, uvp.`user_id`, uvf.`video_id`, uvp.`name`, uvp.`description`
     </select>
 </mapper>

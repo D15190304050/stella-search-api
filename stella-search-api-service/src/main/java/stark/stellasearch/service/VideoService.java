@@ -497,8 +497,8 @@ public class VideoService
     {
         long videoId = request.getVideoId();
 
-        UserVideoInfo videoPlayInfo = userVideoInfoMapper.getVideoBaseInfoById(videoId);
-        if (videoPlayInfo == null)
+        long videoCount = userVideoInfoMapper.countVideoById(videoId);
+        if (videoCount == 0)
             return ServiceResponse.buildErrorResponse(-8, "Invalid video ID: " + videoId);
 
         // Validate if the video is liked before by the same user.
@@ -506,23 +506,25 @@ public class VideoService
         if (userVideoLikeCount != 0)
             return ServiceResponse.buildSuccessResponse(true);
 
-        String errorMessage = insertVideoLike(request, videoPlayInfo);
+        String errorMessage = insertVideoLike(videoId);
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-8, errorMessage);
 
         return ServiceResponse.buildSuccessResponse(true);
     }
 
-    private String insertVideoLike(LikeVideoRequest request, UserVideoInfo videoPlayInfo)
+    private String insertVideoLike(long videoId)
     {
+        long userId = UserContextService.getCurrentUser().getId();
+
         UserVideoLike userVideoLikeInfo = new UserVideoLike();
         Date now = new Date();
-        userVideoLikeInfo.setUserId(UserContextService.getCurrentUser().getId());
-        userVideoLikeInfo.setVideoId(request.getVideoId());
+        userVideoLikeInfo.setUserId(userId);
+        userVideoLikeInfo.setVideoId(videoId);
         userVideoLikeInfo.setLikeType(VIDEO_LIKE);
-        userVideoLikeInfo.setCreatorId(videoPlayInfo.getCreatorId());
+        userVideoLikeInfo.setCreatorId(userId);
         userVideoLikeInfo.setCreationTime(now);
-        userVideoLikeInfo.setModifierId(videoPlayInfo.getCreatorId());
+        userVideoLikeInfo.setModifierId(userId);
         userVideoLikeInfo.setModificationTime(now);
 
         int result = userVideoLikeMapper.insertLike(userVideoLikeInfo);
