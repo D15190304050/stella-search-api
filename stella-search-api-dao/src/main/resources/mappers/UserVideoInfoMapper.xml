@@ -163,21 +163,21 @@
 
     <!-- TODO: Optimize the join here, try to reduce the count of joins. -->
     <select id="getVideoPlayInfoById" resultMap="VideoPlayInfoMap">
-        SELECT uvi.`id`                                   AS `id`,
-               uvi.`title`                                AS `title`,
-               uvi.`name_in_oss`                          AS `name_in_oss`,
-               uvi.`cover_url`                            AS `cover_url`,
-               uvi.`introduction`                         AS `introduction`,
-               uvi.`creator_id`                           AS `creator_id`,
-               abi.`username`                             AS `creator_name`,
-               uvi.`creation_time`                        AS `creation_time`,
-               uvi.`modification_time`                    AS `modification_time`,
-               COALESCE(vpr.play_count, 0)                AS `play_count`,
-               COALESCE(uvf.favorites_count, 0)           AS `favorites_count`,
-               COALESCE(uvl.like_count, 0)                AS `like_count`,
-               COALESCE(uvc.comment_count, 0)             AS `comment_count`,
-               COALESCE(user_like.like_count, 0)          AS `user_likes`,
-               COALESCE(user_favorites.favorite_count, 0) AS `user_favorites`
+        SELECT uvi.`id`                                       AS `id`,
+               uvi.`title`                                    AS `title`,
+               uvi.`name_in_oss`                              AS `name_in_oss`,
+               uvi.`cover_url`                                AS `cover_url`,
+               uvi.`introduction`                             AS `introduction`,
+               uvi.`creator_id`                               AS `creator_id`,
+               abi.`username`                                 AS `creator_name`,
+               uvi.`creation_time`                            AS `creation_time`,
+               uvi.`modification_time`                        AS `modification_time`,
+               COALESCE(vpr.play_count, 0)                    AS `play_count`,
+               COALESCE(uvf.favorites_count, 0)               AS `favorites_count`,
+               COALESCE(uvl.like_count, 0)                    AS `like_count`,
+               COALESCE(uvc.comment_count, 0)                 AS `comment_count`,
+               COALESCE(user_like.like_count, 0) > 0          AS `user_likes`,
+               COALESCE(user_favorites.favorite_count, 0) > 0 AS `user_favorites`
         FROM `user_video_info` uvi
         LEFT JOIN
         (
@@ -193,7 +193,7 @@
         (
             SELECT
                 `video_id`,
-                COUNT(*) AS favorites_count
+                COUNT(DISTINCT `user_id`) AS favorites_count
             FROM `user_video_favorites`
             WHERE `video_id` = #{videoId}
             GROUP BY `video_id`
@@ -235,8 +235,8 @@
         (
             SELECT
                 `video_id`,
-                COUNT(*) AS favorite_count
-            FROM user_video_favorites
+                COUNT(DISTINCT `user_id`) AS favorite_count
+            FROM `user_video_favorites`
             WHERE `user_id` = #{userId}
               AND `video_id` = #{videoId}
             GROUP BY `video_id`
@@ -253,6 +253,7 @@
         WHERE `id` = #{id}
     </select>
 
+    <!-- TODO: Implement it by ES. -->
     <select id="getVideoPlayInfosByKeyword" resultMap="VideoPlayInfoMap">
         SELECT uvi.`id`                         AS `id`,
                uvi.`title`                      AS `title`,
