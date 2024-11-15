@@ -16,10 +16,8 @@ import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.dao.UserVideoInfoMapper;
-import stark.stellasearch.dao.UserVideoLikeMapper;
+import stark.stellasearch.dao.*;
 import stark.stellasearch.domain.UserVideoLike;
-import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.VideoPlayRecord;
 import stark.stellasearch.dto.params.*;
@@ -67,6 +65,12 @@ public class VideoService
 
     @Autowired
     private VideoPlayRecordMapper videoPlayRecordMapper;
+
+    @Autowired
+    private UserVideoPlaylistMapper userVideoPlaylistMapper;
+
+    @Autowired
+    private UserVideoFavoritesMapper userVideoFavoritesMapper;
 
     private String generateTaskId(long userId)
     {
@@ -594,5 +598,29 @@ public class VideoService
         response.putExtra("size", videoPlayInfos.size());
 
         return response;
+    }
+
+    // TODO: Add visible options for playlists belonging to others.
+    public ServiceResponse<PaginatedData<VideoPlayInfo>> getVideoPlayInfoInPlaylist(@Valid GetVideoPlayInfoInPlaylistRequest request)
+    {
+        long playlistId = request.getPlaylistId();
+
+        long playlistCount = userVideoPlaylistMapper.countPlaylistById(playlistId);
+        if (playlistCount == 0)
+            return ServiceResponse.buildErrorResponse(-1, "The playlist with ID " + playlistId + " does not exist.");
+
+        GetVideoPlayInfoInPlaylistQueryParam queryParam = new GetVideoPlayInfoInPlaylistQueryParam();
+        queryParam.setUserId(UserContextService.getCurrentUser().getId());
+        queryParam.setPlaylistId(playlistId);
+        queryParam.setPaginationParam(request);
+        List<VideoPlayInfo> videoPlayInfosInPlaylist = userVideoInfoMapper.getVideoPlayInfosByPlaylistId(queryParam);
+
+        long videoCountInPlaylist = userVideoFavoritesMapper.countVideosInPlaylist(playlistId);
+
+        PaginatedData<VideoPlayInfo> paginatedData = new PaginatedData<>();
+        paginatedData.setData(videoPlayInfosInPlaylist);
+        paginatedData.setTotal(videoCountInPlaylist);
+
+        return ServiceResponse.buildSuccessResponse(paginatedData);
     }
 }

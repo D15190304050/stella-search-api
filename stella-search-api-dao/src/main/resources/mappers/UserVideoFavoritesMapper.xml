@@ -71,6 +71,12 @@
           AND `user_id` = #{userId}
     </select>
 
+    <delete id="deleteFavoritesInPlaylist">
+        DELETE
+        FROM `user_video_favorites`
+        WHERE `playlist_id` = #{playlistId}
+    </delete>
+
     <delete id="deleteFavoritesByUserAndVideoId">
         DELETE
         FROM `user_video_favorites`
@@ -108,4 +114,10 @@
               AND `playlist_id` = `user_video_playlist`.`id`
         )
     </insert>
+
+    <select id="countVideosInPlaylist" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_favorites`
+        WHERE `playlist_id` = #{playlistId}
+    </select>
 </mapper>

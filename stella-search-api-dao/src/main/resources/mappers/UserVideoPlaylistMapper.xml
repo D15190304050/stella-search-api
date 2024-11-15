@@ -38,17 +38,14 @@
         UPDATE `user_video_playlist`
         SET `name`              = #{name},
             `description`       = #{description},
-            `modifier_id`       = #{modifierId},
-            `modification_time` = #{modificationTime}
+            `modifier_id`       = #{modifierId}
         WHERE `id` = #{id}
     </update>
 
-    <delete id="delete">
-        DELETE uvp
-        FROM `user_video_playlist` uvp
-        INNER JOIN `user_video_favorites` uvf
-               ON uvp.id = uvf.playlist_id
-        WHERE uvp.id = #{id}
+    <delete id="deletePlaylistById">
+        DELETE
+        FROM `user_video_playlist`
+        WHERE `id` = #{id}
     </delete>
 
     <select id="countPlaylistByUserId" resultType="long">
@@ -67,6 +64,13 @@
         SELECT COUNT(*)
         FROM `user_video_playlist`
         WHERE `id` = #{id}
+    </select>
+
+    <select id="countPlaylistByIdAndUserId" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_playlist`
+        WHERE `id` = #{id}
+          AND `user_id` = #{userId}
     </select>
 
     <select id="getPlaylistIdsByUserId" resultType="long">

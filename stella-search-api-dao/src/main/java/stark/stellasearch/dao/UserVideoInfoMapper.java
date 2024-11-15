@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.dto.params.GetVideoInfosByKeywordQueryParam;
 import stark.stellasearch.dto.params.GetVideoInfosByUserIdQueryParam;
+import stark.stellasearch.dto.params.GetVideoPlayInfoInPlaylistQueryParam;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface UserVideoInfoMapper
     long countVideoById(long id);
     List<VideoPlayInfo> getVideoPlayInfosByKeyword(GetVideoInfosByKeywordQueryParam getVideoInfosByKeywordQueryParam);
     long countVideoByKeyword(String keyword);
+
+    List<VideoPlayInfo> getVideoPlayInfosByPlaylistId(GetVideoPlayInfoInPlaylistQueryParam queryParam);
 }
