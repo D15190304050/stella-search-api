@@ -49,6 +49,7 @@ public class PlaylistService
         if (userVideoPlaylistMapper.countPlaylistByUserId(userId) >= MAX_PLAYLIST_COUNT)
             return ServiceResponse.buildErrorResponse(-1, "You can only create up to 20 playlists.");
 
+        // TODO: Should add a lock here to prevent concurrent adding new playlists.
         String playlistName = request.getName();
         String description = request.getDescription();
         UserVideoPlaylist newPlaylist = addPlaylistForUser(playlistName, description, userId);
