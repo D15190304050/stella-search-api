@@ -122,4 +122,10 @@ public class VideoController
     {
         return videoService.searchVideo(request);
     }
+
+    @GetMapping("/in-playlist")
+    public ServiceResponse<PaginatedData<VideoPlayInfo>> getVideoPlayInfoInPlaylist(@ModelAttribute GetVideoPlayInfoInPlaylistRequest request)
+    {
+        return videoService.getVideoPlayInfoInPlaylist(request);
+    }
 }

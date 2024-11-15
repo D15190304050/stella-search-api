@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 @Data
 public class CreatePlaylistRequest
 {
-    @NotBlank(message = "The playlist name is required")
+    @NotBlank(message = "The playlist name is required.")
     private String name;
 
     @Size(max = 1000, message = "You can type at most 1000 characters for description.")

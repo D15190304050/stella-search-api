@@ -1,20 +1,16 @@
 package stark.stellasearch.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.domain.UserVideoFavorites;
-import stark.stellasearch.domain.UserVideoPlaylist;
 import stark.stellasearch.dto.params.*;
-import stark.stellasearch.dto.results.PlaylistWithVideoCount;
+import stark.stellasearch.dto.results.PlaylistInfo;
+import stark.stellasearch.dto.results.PlaylistWithVideoCheck;
 import stark.stellasearch.service.PlaylistService;
 
 import java.util.List;
 
-@Controller
-@ResponseBody
+@RestController
 @RequestMapping("/playlist")
 public class PlaylistController
 {
@@ -30,7 +26,7 @@ public class PlaylistController
     private PlaylistService playlistService;
 
     @PostMapping("/create")
-    public ServiceResponse<UserVideoPlaylist> createPlaylist(@RequestBody CreatePlaylistRequest request)
+    public ServiceResponse<PlaylistWithVideoCheck> createPlaylist(@RequestBody CreatePlaylistRequest request)
     {
         return playlistService.createPlaylist(request);
     }
@@ -48,15 +44,9 @@ public class PlaylistController
     }
 
     @GetMapping("/list")
-    public ServiceResponse<List<PlaylistWithVideoCount>> getPlaylistList()
+    public ServiceResponse<List<PlaylistInfo>> getPlaylistListsOfCurrentUser()
     {
-        return playlistService.getPlaylist();
-    }
-
-    @PostMapping("/add-video")
-    public ServiceResponse<Long> addVideoToPlaylist(@RequestBody AddVideoToPlaylistRequest request)
-    {
-        return playlistService.addVideoToPlaylist(request);
+        return playlistService.getPlaylistsOfCurrentUser();
     }
 
     @PostMapping("/remove-video")
@@ -65,10 +55,15 @@ public class PlaylistController
         return playlistService.removeVideoFromPlaylist(request);
     }
 
-    @GetMapping("/show-favorites")
-    public ServiceResponse<PaginatedData<UserVideoFavorites>> showFavoritesByPlaylist(@ModelAttribute ShowFavoritesByPlaylistRequest request)
+    @GetMapping("/playlist-with-checks")
+    public ServiceResponse<List<PlaylistWithVideoCheck>> getPlaylistWithVideoChecks(@RequestParam("videoId") long videoId)
     {
-        return playlistService.showFavoritesByPlaylist(request);
+        return playlistService.getPlaylistWithVideoChecks(videoId);
     }
 
+    @PostMapping("/set-favorites")
+    public ServiceResponse<Boolean> setVideoFavorites(@RequestBody SetVideoFavoritesRequest request)
+    {
+        return playlistService.setVideoFavorites(request);
+    }
 }

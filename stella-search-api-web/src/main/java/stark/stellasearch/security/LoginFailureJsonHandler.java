@@ -20,7 +20,7 @@ import java.io.IOException;
 public class LoginFailureJsonHandler implements AuthenticationFailureHandler
 {
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException
     {
         String exceptionInfo = ExceptionInfoFormatter.formatMessageAndStackTrace(exception);
         log.error("Login failure: {}", exceptionInfo);
