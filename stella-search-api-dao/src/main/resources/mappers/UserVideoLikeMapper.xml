@@ -41,8 +41,8 @@
         AND `video_id` = #{videoId}
     </delete>
 
-    <select id="getUserVideoLike" resultMap="UserVideoLikeResultMap" >
-        SELECT `id`, `user_id`, `video_id`, `like_type`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`
+    <select id="countUserVideoLike" resultType="long" >
+        SELECT COUNT(*)
         FROM `user_video_like`
         WHERE `user_id` = #{userId}
         AND `video_id` = #{videoId}

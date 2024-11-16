@@ -19,4 +19,9 @@ public class UserVideoPlaylist extends DomainBase
      * Name of the playlist.
      */
     private String name;
+
+    /**
+     * Description of the playlist.
+     */
+    private String description;
 }

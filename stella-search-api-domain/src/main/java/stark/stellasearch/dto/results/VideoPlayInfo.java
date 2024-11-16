@@ -21,4 +21,6 @@ public class VideoPlayInfo
     private long likeCount;
     private long commentCount;
     private String videoPlayUrl;
+    private boolean userLikes;
+    private boolean userFavorites;
 }

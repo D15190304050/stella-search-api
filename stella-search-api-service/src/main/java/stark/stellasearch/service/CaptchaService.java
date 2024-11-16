@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.FastByteArrayOutputStream;
 import stark.dataworks.basic.data.redis.RedisQuickOperation;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
@@ -13,9 +12,10 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.results.CaptchaResponse;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +37,7 @@ public class CaptchaService
         BufferedImage captchaImage = captchaProducer.createImage(captchaText);
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
         ImageIO.write(captchaImage, "jpg", outputStream);
-        String captchaBytes = "data:image/jpeg;base64," + Base64Utils.encodeToString(outputStream.toByteArray());
+        String captchaBytes = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
         String captchaId = "Captcha-" + UUID.randomUUID().toString();
         redisQuickOperation.set(captchaId, captchaText, 5, TimeUnit.MINUTES);

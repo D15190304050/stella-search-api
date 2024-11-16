@@ -30,6 +30,8 @@
         <result property="favoritesCount" column="favorites_count"/>
         <result property="likeCount" column="like_count"/>
         <result property="commentCount" column="comment_count"/>
+        <result property="userLikes" column="user_likes"/>
+        <result property="userFavorites" column="user_favorites"/>
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -130,6 +132,7 @@
         ON uvi.`id` = uvc.`video_id`
         WHERE uvi.`creator_id` = #{userId}
           AND uvi.`title` IS NOT NULL
+        ORDER BY `creation_time` DESC
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
     
@@ -158,7 +161,100 @@
         WHERE `id` = #{id}
     </select>
 
+    <!-- TODO: Optimize the join here, try to reduce the count of joins. -->
     <select id="getVideoPlayInfoById" resultMap="VideoPlayInfoMap">
+        SELECT uvi.`id`                                       AS `id`,
+               uvi.`title`                                    AS `title`,
+               uvi.`name_in_oss`                              AS `name_in_oss`,
+               uvi.`cover_url`                                AS `cover_url`,
+               uvi.`introduction`                             AS `introduction`,
+               uvi.`creator_id`                               AS `creator_id`,
+               abi.`username`                                 AS `creator_name`,
+               uvi.`creation_time`                            AS `creation_time`,
+               uvi.`modification_time`                        AS `modification_time`,
+               COALESCE(vpr.play_count, 0)                    AS `play_count`,
+               COALESCE(uvf.favorites_count, 0)               AS `favorites_count`,
+               COALESCE(uvl.like_count, 0)                    AS `like_count`,
+               COALESCE(uvc.comment_count, 0)                 AS `comment_count`,
+               COALESCE(user_like.like_count, 0) > 0          AS `user_likes`,
+               COALESCE(user_favorites.favorite_count, 0) > 0 AS `user_favorites`
+        FROM `user_video_info` uvi
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS play_count
+            FROM `video_play_record`
+            WHERE `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) vpr
+        ON uvi.`id` = vpr.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(DISTINCT `user_id`) AS favorites_count
+            FROM `user_video_favorites`
+            WHERE `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) AS uvf
+        ON uvi.`id` = uvf.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS like_count
+            FROM `user_video_like`
+            WHERE `video_id` = #{videoId}
+              AND `like_type` = 1
+            GROUP BY `video_id`
+        ) AS uvl
+        ON uvi.`id` = uvl.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS comment_count
+            FROM `user_video_comment`
+            WHERE `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) AS uvc
+        ON uvi.`id` = uvc.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS like_count
+            FROM `user_video_like`
+            WHERE `user_id` = #{userId}
+              AND `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) AS user_like
+        ON uvi.`id` = user_like.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(DISTINCT `user_id`) AS favorite_count
+            FROM `user_video_favorites`
+            WHERE `user_id` = #{userId}
+              AND `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) AS user_favorites
+        ON uvi.`id` = user_favorites.`video_id`
+        INNER JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
+        WHERE uvi.`id` = #{videoId}
+          AND uvi.`title` IS NOT NULL
+    </select>
+
+    <select id="countVideoById" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_video_info`
+        WHERE `id` = #{id}
+    </select>
+
+    <!-- TODO: Implement it by ES. -->
+    <select id="getVideoPlayInfosByKeyword" resultMap="VideoPlayInfoMap">
         SELECT uvi.`id`                         AS `id`,
                uvi.`title`                      AS `title`,
                uvi.`name_in_oss`                AS `name_in_oss`,
@@ -171,41 +267,186 @@
                COALESCE(vpr.play_count, 0)      AS `play_count`,
                COALESCE(uvf.favorites_count, 0) AS `favorites_count`,
                COALESCE(uvl.like_count, 0)      AS `like_count`,
-               COALESCE(uvc.comment_count, 0)   AS `comment_count`
+               COALESCE(uvc.comment_count, 0)   AS `comment_count`,
+               COALESCE(user_like.like_count, 0)          AS `user_likes`,
+               COALESCE(user_favorites.favorite_count, 0) AS `user_favorites`
         FROM `user_video_info` uvi
-                 LEFT JOIN
-             (SELECT `video_id`,
-                     COUNT(*) AS play_count
-              FROM `video_play_record`
-              WHERE `video_id` = #{videoId}
-              GROUP BY `video_id`) vpr
-             ON
-                 uvi.`id` = vpr.`video_id`
-                 LEFT JOIN (SELECT `video_id`,
-                                   COUNT(*) AS favorites_count
-                            FROM `user_video_favorites`
-                            WHERE `video_id` = #{videoId}
-                            GROUP BY `video_id`) AS uvf
-                           ON uvi.`id` = uvf.`video_id`
-                 LEFT JOIN (SELECT `video_id`, COUNT(*) AS like_count
-                            FROM `user_video_like`
-                            WHERE `video_id` = #{videoId}
-                              AND `like_type` = 1
-                            GROUP BY `video_id`) AS uvl
-                           ON uvi.`id` = uvl.`video_id`
-                 LEFT JOIN (SELECT `video_id`, COUNT(*) AS comment_count
-                            FROM `user_video_comment`
-                            WHERE `video_id` = #{videoId}
-                            GROUP BY `video_id`) AS uvc
-                           ON uvi.`id` = uvc.`video_id`
-                 INNER JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
-        WHERE uvi.`id` = #{videoId}
+                 LEFT JOIN (
+            SELECT `video_id`, COUNT(*) AS play_count
+            FROM `video_play_record`
+            GROUP BY `video_id`
+        ) vpr ON uvi.`id` = vpr.`video_id`
+                 LEFT JOIN (
+            SELECT `video_id`, COUNT(*) AS favorites_count
+            FROM `user_video_favorites`
+            GROUP BY `video_id`
+        ) uvf ON uvi.`id` = uvf.`video_id`
+                 LEFT JOIN (
+            SELECT `video_id`, COUNT(*) AS like_count
+            FROM `user_video_like`
+            WHERE `like_type` = 1
+            GROUP BY `video_id`
+        ) uvl ON uvi.`id` = uvl.`video_id`
+                 LEFT JOIN (
+            SELECT `video_id`, COUNT(*) AS comment_count
+            FROM `user_video_comment`
+            GROUP BY `video_id`
+        ) uvc ON uvi.`id` = uvc.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS like_count
+            FROM `user_video_like`
+            WHERE `user_id` = #{userId}
+            AND `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) AS user_like
+        ON uvi.`id` = user_like.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS favorite_count
+            FROM user_video_favorites
+            WHERE `user_id` = #{userId}
+            AND `video_id` = #{videoId}
+            GROUP BY `video_id`
+        ) AS user_favorites
+        ON uvi.`id` = user_favorites.`video_id`
+        INNER JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
+        WHERE uvi.`title` LIKE CONCAT('%', #{keyword}, '%')
           AND uvi.`title` IS NOT NULL
+        LIMIT #{pageCapacity} OFFSET #{offset};
     </select>
 
-    <select id="countVideoById" resultType="long">
+    <select id="countVideoByKeyword" resultType="java.lang.Long">
         SELECT COUNT(*)
         FROM `user_video_info`
-        WHERE `id` = #{id}
+        WHERE `title` LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
+    <select id="getVideoPlayInfosByPlaylistId" resultMap="VideoPlayInfoMap">
+        SELECT uvi.`id`                                       AS `id`,
+               uvi.`title`                                    AS `title`,
+               uvi.`name_in_oss`                              AS `name_in_oss`,
+               uvi.`cover_url`                                AS `cover_url`,
+               uvi.`introduction`                             AS `introduction`,
+               uvi.`creator_id`                               AS `creator_id`,
+               abi.`username`                                 AS `creator_name`,
+               uvi.`creation_time`                            AS `creation_time`,
+               uvi.`modification_time`                        AS `modification_time`,
+               COALESCE(vpr.play_count, 0)                    AS `play_count`,
+               COALESCE(uvf.favorites_count, 0)               AS `favorites_count`,
+               COALESCE(uvl.like_count, 0)                    AS `like_count`,
+               COALESCE(uvc.comment_count, 0)                 AS `comment_count`,
+               COALESCE(user_like.like_count, 0) > 0          AS `user_likes`,
+               COALESCE(user_favorites.favorite_count, 0) > 0 AS `user_favorites`
+        FROM
+        (
+            SELECT *
+            FROM `user_video_info`
+            WHERE `id` IN
+            (
+                SELECT DISTINCT `video_id`
+                FROM `user_video_favorites`
+                WHERE `playlist_id` = #{playlistId}
+            )
+        ) uvi
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS play_count
+            FROM `video_play_record`
+            WHERE `video_id` IN
+            (
+                SELECT DISTINCT video_id
+                FROM `user_video_favorites`
+                WHERE playlist_id = #{playlistId}
+            )
+            GROUP BY `video_id`
+        ) vpr
+        ON uvi.`id` = vpr.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(DISTINCT `user_id`) AS favorites_count
+            FROM `user_video_favorites`
+            WHERE `video_id` IN
+            (
+                SELECT DISTINCT video_id
+                FROM `user_video_favorites`
+                WHERE playlist_id = #{playlistId}
+            )
+            GROUP BY `video_id`
+        ) AS uvf
+        ON uvi.`id` = uvf.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS like_count
+            FROM `user_video_like`
+            WHERE `like_type` = 1
+              AND `video_id` IN
+            (
+                SELECT DISTINCT video_id
+                FROM `user_video_favorites`
+                WHERE playlist_id = #{playlistId}
+            )
+            GROUP BY `video_id`
+        ) AS uvl
+        ON uvi.`id` = uvl.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS comment_count
+            FROM `user_video_comment`
+            WHERE `video_id` IN
+            (
+                SELECT DISTINCT video_id
+                FROM `user_video_favorites`
+                WHERE playlist_id = #{playlistId}
+            )
+            GROUP BY `video_id`
+        ) AS uvc
+        ON uvi.`id` = uvc.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(*) AS like_count
+            FROM `user_video_like`
+            WHERE `user_id` = #{userId}
+              AND `video_id` IN
+            (
+                SELECT DISTINCT video_id
+                FROM `user_video_favorites`
+                WHERE playlist_id = #{playlistId}
+            )
+            GROUP BY `video_id`
+        ) AS user_like
+        ON uvi.`id` = user_like.`video_id`
+        LEFT JOIN
+        (
+            SELECT
+                `video_id`,
+                COUNT(DISTINCT `user_id`) AS favorite_count
+            FROM `user_video_favorites`
+            WHERE `video_id` IN
+            (
+                SELECT DISTINCT video_id
+                FROM `user_video_favorites`
+                WHERE playlist_id = #{playlistId}
+            )
+            GROUP BY `video_id`
+        ) AS user_favorites
+        ON uvi.`id` = user_favorites.`video_id`
+        INNER JOIN `account_base_info` abi ON uvi.`creator_id` = abi.`id`
+        WHERE uvi.`title` IS NOT NULL
+        LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 </mapper>

@@ -1,19 +1,20 @@
 spring:
     datasource:
-        druid:
+        url: jdbc:mysql://localhost:3306/stella_search?useUnicode=true&characterEncoding=utf8
+        hikari:
             driver-class-name: com.mysql.cj.jdbc.Driver
-            url: jdbc:mysql://localhost:3306/stella_search?useUnicode=true&characterEncoding=utf8
             username: DinoStark
             password: non-feeling
-    redis:
-        host: localhost
-#        port: 6379
-        port: 10079
     cloud:
         nacos:
             discovery:
 #                server-addr: localhost:8848
                 server-addr: localhost:13848
+    data:
+        redis:
+            host: localhost
+#            port: 6379
+            port: 10079
     kafka:
         bootstrap-servers: localhost:29092,localhost:39092,localhost:49092
         consumer:
@@ -35,6 +36,10 @@ images:
 
 stella-search:
     jwt-secret: q4~@x2uC$f@M2x*^e5&DB^L!3~)6@+
+
+logging:
+    level:
+        stark.stellasearch.dao: DEBUG
 
 doubao:
     model-endpoint: ep-20240917215653-hmx7x

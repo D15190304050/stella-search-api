@@ -10,8 +10,8 @@ import stark.stellasearch.service.constants.SecurityConstants;
 import stark.stellasearch.service.dto.AccountPrincipal;
 import stark.stellasearch.service.redis.RedisKeyManager;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class TokenLogoutHandler implements LogoutHandler
