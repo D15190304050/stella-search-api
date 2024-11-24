@@ -6,13 +6,12 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.messaging.Message;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 
 @Component
 @Slf4j
@@ -43,10 +42,10 @@ public class ProducerService
      * @param topic
      * @param data
      */
-    public void sendMessageAsync(String topic, String data, ListenableFutureCallback<SendResult<String, String>> callback)
+    public void sendMessageAsync(String topic, String data, BiConsumer<SendResult<String, String>, Throwable> callback)
     {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, data);
-        future.addCallback(callback);
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, data);
+        future.whenComplete(callback);
     }
 
     /**
@@ -56,47 +55,21 @@ public class ProducerService
      */
     public void sendMessage(ProducerRecord<String, String> record)
     {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(record);
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>()
-        {
-            @Override
-            public void onFailure(Throwable throwable)
-            {
-                log.error("发送消息失败!失败原因是:{}", throwable.getMessage());
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, String> sendResult)
-            {
-                RecordMetadata metadata = sendResult.getRecordMetadata();
-                log.debug("发送消息成功!消息主题是:{},消息分区是:{}", metadata.topic(), metadata.partition());
-            }
-        });
+        logSendResult(kafkaTemplate.send(record));
     }
 
-    /**
-     * 发送Message消息
-     *
-     * @param message
-     */
-    public void sendMessage(Message<String> message)
+    private void logSendResult(CompletableFuture<SendResult<String, String>> sendResultFuture)
     {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(message);
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>()
-        {
-            @Override
-            public void onFailure(Throwable throwable)
-            {
-                log.error("发送消息失败!失败原因是:{}", throwable.getMessage());
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, String> sendResult)
+        sendResultFuture.whenComplete((sendResult, throwable) ->
             {
                 RecordMetadata metadata = sendResult.getRecordMetadata();
                 log.debug("发送消息成功!消息主题是:{},消息分区是:{}", metadata.topic(), metadata.partition());
-            }
-        });
+            })
+            .exceptionally(throwable ->
+            {
+                log.error("发送消息失败!失败原因是:{}", throwable.getMessage());
+                return null;
+            });
     }
 
     /**
@@ -108,52 +81,19 @@ public class ProducerService
      */
     public void sendMessage(String topic, String key, String data)
     {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, key, data);
+        CompletableFuture<SendResult<String, String>> sendResultFuture = kafkaTemplate.send(topic, key, data);
         log.info("发送到：{} ，消息体为：{}", topic, data);
-        future.addCallback(
-                success -> log.debug("发送消息成功!"),
-                failure -> log.error("发送消息失败!失败原因是:{}", failure.getMessage())
-        );
+        logSendResult(sendResultFuture);
     }
 
     public void sendMessage(String topic, Integer partition, String key, String data)
     {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, partition, key, data);
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>()
-        {
-            @Override
-            public void onFailure(Throwable throwable)
-            {
-                log.error("发送消息失败!失败原因是:{}", throwable.getMessage());
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, String> sendResult)
-            {
-                RecordMetadata metadata = sendResult.getRecordMetadata();
-                log.debug("发送消息成功!消息主题是:{},消息分区是:{}", metadata.topic(), metadata.partition());
-            }
-        });
+        logSendResult(kafkaTemplate.send(topic, partition, key, data));
     }
 
     public void sendMessage(String topic, Integer partition, Long timestamp, String key, String data)
     {
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, partition, timestamp, key, data);
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>()
-        {
-            @Override
-            public void onFailure(Throwable throwable)
-            {
-                log.error("发送消息失败!失败原因是:{}", throwable.getMessage());
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, String> sendResult)
-            {
-                RecordMetadata metadata = sendResult.getRecordMetadata();
-                log.debug("发送消息成功!消息主题是:{},消息分区是:{}", metadata.topic(), metadata.partition());
-            }
-        });
+        logSendResult(kafkaTemplate.send(topic, partition, timestamp, key, data));
     }
 }
 
