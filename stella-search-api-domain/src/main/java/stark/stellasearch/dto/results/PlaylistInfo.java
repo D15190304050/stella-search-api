@@ -11,7 +11,5 @@ public class PlaylistInfo
     private long userId;
     private String name;
     private String description;
-    private Date creationTime;
-    private long modifierId;
-    private Date modificationTime;
+    private long videoCount;
 }

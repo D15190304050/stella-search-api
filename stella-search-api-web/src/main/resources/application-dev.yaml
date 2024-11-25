@@ -31,3 +31,7 @@ images:
 
 stella-search:
     jwt-secret: q4~@x2uC$f@M2x*^e5&DB^L!3~)6@+
+
+logging:
+    level:
+        stark.stellasearch.dao: DEBUG
