@@ -47,6 +47,13 @@
         OR `email` = #{email}
     </select>
 
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `account_base_info`
+        (`phone_number`, `encrypted_password`, `username`, `nickname`, `avatar_url`, `email`, `phone_number_prefix`, `gender`)
+        VALUES
+        (#{phoneNumber}, #{encryptedPassword}, #{username}, #{nickname}, #{avatarUrl}, #{email}, #{phoneNumberPrefix}, #{gender})
+    </insert>
+
     <select id="getAccountByUserId" resultMap="BaseResultMap">
         SELECT `id`,
                `phone_number`,
@@ -63,11 +70,4 @@
         FROM `account_base_info`
         WHERE `id` = #{userId}
     </select>
-
-    <insert id="insert">
-        INSERT INTO `account_base_info`
-        (`phone_number`, `encrypted_password`, `username`, `nickname`, `avatar_url`, `email`, `phone_number_prefix`, `gender`)
-        VALUES
-        (#{phoneNumber}, #{encryptedPassword}, #{username}, #{nickname}, #{avatarUrl}, #{email}, #{phoneNumberPrefix}, #{gender})
-    </insert>
 </mapper>

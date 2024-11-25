@@ -17,4 +17,11 @@ public class GlobalExceptionHandler
         ExceptionLogger.logExceptionInfo(e);
         return ServiceResponse.buildErrorResponse(-100, e.getMessage());
     }
+
+    @ExceptionHandler({Exception.class})
+    public ServiceResponse<?> handleException(Exception e)
+    {
+        ExceptionLogger.logExceptionInfo(e);
+        return ServiceResponse.buildErrorResponse(-200, e.getMessage());
+    }
 }

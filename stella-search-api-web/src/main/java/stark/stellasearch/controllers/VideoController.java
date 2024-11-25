@@ -102,7 +102,7 @@ public class VideoController
     @GetMapping("/play")
     public ServiceResponse<VideoPlayInfo> getVideoInfoById(@RequestParam("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
-        return videoService.getVideoInfoById(videoId);
+        return videoService.getVideoPlayInfoById(videoId);
     }
 
     @PostMapping("/like")
@@ -121,5 +121,11 @@ public class VideoController
     public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@ModelAttribute SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
         return videoService.searchVideo(request);
+    }
+
+    @GetMapping("/in-playlist")
+    public ServiceResponse<PaginatedData<VideoPlayInfo>> getVideoPlayInfoInPlaylist(@ModelAttribute GetVideoPlayInfoInPlaylistRequest request)
+    {
+        return videoService.getVideoPlayInfoInPlaylist(request);
     }
 }
