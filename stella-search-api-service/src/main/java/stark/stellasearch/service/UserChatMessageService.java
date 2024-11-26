@@ -9,9 +9,7 @@ import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.AccountBaseInfoMapper;
 import stark.stellasearch.dao.UserChatMessageMapper;
 import stark.stellasearch.dao.UserChatSessionMapper;
-import stark.stellasearch.domain.AccountBaseInfo;
 import stark.stellasearch.domain.UserChatMessage;
-import stark.stellasearch.domain.UserChatSession;
 import stark.stellasearch.dto.params.GetUserChatMessageQueryParam;
 import stark.stellasearch.dto.params.PaginationRequestParam;
 import stark.stellasearch.dto.params.SendUserChatMessageRequest;
@@ -37,30 +35,35 @@ public class UserChatMessageService
         // 1. Validate if the recipient id exists.
         long recipientId = request.getRecipientId();
         long currentUserId = UserContextService.getCurrentUser().getId();
-        AccountBaseInfo recipientInfo = accountBaseInfoMapper.getAccountByUserId(recipientId);
-        if (recipientInfo == null)
+        if (accountBaseInfoMapper.countByUserId(recipientId) == 0)
             return ServiceResponse.buildErrorResponse(-1, "The recipient does not exist.");
 
         // 2. Validate if the session id exists.
-        UserChatSession chatSession = userChatSessionMapper.getSessionByUserIds(currentUserId, recipientId);
-        if (chatSession == null)
+        long sessionId = userChatSessionMapper.getSessionIdByUserIds(currentUserId, recipientId);
+        if (sessionId <= 0)
             return ServiceResponse.buildErrorResponse(-2, "User session does not exist.");
 
         // 3. Send message.
+        UserChatMessage userChatMessage = getUserChatMessage(request, currentUserId, sessionId);
+
+        // 4. Return the message id.
+        return ServiceResponse.buildSuccessResponse(userChatMessage.getId());
+    }
+
+    private UserChatMessage getUserChatMessage(SendUserChatMessageRequest request, long currentUserId, long sessionId)
+    {
         Date now = new Date();
         UserChatMessage userChatMessage = new UserChatMessage();
         userChatMessage.setSenderId(currentUserId);
-        userChatMessage.setRecipientId(recipientId);
+        userChatMessage.setRecipientId(request.getRecipientId());
         userChatMessage.setContent(request.getContent());
-        userChatMessage.setSessionId(chatSession.getId());
+        userChatMessage.setSessionId(sessionId);
         userChatMessage.setCreationTime(now);
         userChatMessage.setCreatorId(currentUserId);
         userChatMessage.setModificationTime(now);
         userChatMessage.setModifierId(currentUserId);
         userChatMessageMapper.insert(userChatMessage);
-
-        // 4. Return the message id.
-        return ServiceResponse.buildSuccessResponse(userChatMessage.getId());
+        return userChatMessage;
     }
 
     public ServiceResponse<PaginatedData<UserChatMessage>> getMessagesBySessionId(long sessionId, PaginationRequestParam paginationParam)
@@ -68,8 +71,8 @@ public class UserChatMessageService
         // 1. Validate if the session id exists.
         if (sessionId <= 0)
             return ServiceResponse.buildErrorResponse(-1, "Invalid session id.");
-        UserChatSession chatSession = userChatSessionMapper.getSessionById(sessionId);
-        if (chatSession == null)
+
+        if (userChatSessionMapper.countById(sessionId) == 0)
             return ServiceResponse.buildErrorResponse(-2, "User session does not exist.");
 
         // 2. Get messages from session id.

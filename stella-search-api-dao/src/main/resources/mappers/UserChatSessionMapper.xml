@@ -97,16 +97,16 @@
            OR (`user1_id` = #{user2Id} AND `user2_id` = #{user1Id})
     </select>
 
-    <select id="getSessionById" resultType="stark.stellasearch.domain.UserChatSession">
-        SELECT `id`,
-               `user1_id`,
-               `user2_id`,
-               `creator_id`,
-               `status`,
-               `creation_time`,
-               `modifier_id`,
-               `modification_time`
+    <select id="countById" resultType="java.lang.Integer">
+        SELECT COUNT(*)
         FROM `user_chat_session`
         WHERE `id` = #{id}
+    </select>
+
+    <select id="getSessionIdByUserIds" resultType="java.lang.Long">
+        SELECT `id`
+        FROM `user_chat_session`
+        WHERE (`user1_id` = #{user1Id} AND `user2_id` = #{user2Id})
+           OR (`user1_id` = #{user2Id} AND `user2_id` = #{user1Id})
     </select>
 </mapper>

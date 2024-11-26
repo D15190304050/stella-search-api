@@ -70,4 +70,15 @@
         FROM `account_base_info`
         WHERE `id` = #{userId}
     </select>
+    <select id="countByUsername" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `account_base_info`
+        WHERE `username` = #{username}
+    </select>
+
+    <select id="countByUserId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `account_base_info`
+        WHERE `id` = #{userId}
+    </select>
 </mapper>

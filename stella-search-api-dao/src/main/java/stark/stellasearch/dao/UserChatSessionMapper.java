@@ -17,5 +17,6 @@ public interface UserChatSessionMapper
     int deleteById(long id);
     long countAllSessionsByUserId(long userId);
     UserChatSession getSessionByUserIds(@Param("user1Id") long user1Id, @Param("user2Id") long user2Id);
-    UserChatSession getSessionById(long id);
+    int countById(long id);
+    long getSessionIdByUserIds(@Param("user1Id") long user1Id, @Param("user2Id") long user2Id);
 }

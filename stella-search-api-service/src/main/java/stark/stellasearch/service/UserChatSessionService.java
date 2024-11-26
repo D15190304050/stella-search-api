@@ -2,7 +2,6 @@ package stark.stellasearch.service;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,10 @@ import stark.stellasearch.dao.UserChatMessageMapper;
 import stark.stellasearch.dao.UserChatSessionMapper;
 import stark.stellasearch.domain.AccountBaseInfo;
 import stark.stellasearch.domain.UserChatSession;
-import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.params.CreateUserChatSessionRequest;
+import stark.stellasearch.dto.params.DeleteUserChatSessionRequest;
+import stark.stellasearch.dto.params.GetUserChatSessionListQueryParam;
+import stark.stellasearch.dto.params.GetUserChatSessionListRequest;
 import stark.stellasearch.dto.results.UserChatSessionInfo;
 
 import java.util.Date;
@@ -36,6 +38,7 @@ public class UserChatSessionService
         // 1. Validate if the recipient name equals current user name.
         String recipientName = request.getRecipientName();
         String currentUsername = UserContextService.getCurrentUser().getUsername();
+        long currentUserId = UserContextService.getCurrentUser().getId();
         if (recipientName.equals(currentUsername))
             return ServiceResponse.buildErrorResponse(-1, "You cannot create a chat session with yourself.");
 
@@ -45,24 +48,24 @@ public class UserChatSessionService
             return ServiceResponse.buildErrorResponse(-1, "The recipient does not exist.");
 
         // 3. Validate if the session already exists.
-        if(userChatSessionMapper.getSessionByUserIds(recipientInfo.getId(), UserContextService.getCurrentUser().getId()) != null)
+        if (userChatSessionMapper.getSessionByUserIds(recipientInfo.getId(), currentUserId) != null)
             return ServiceResponse.buildErrorResponse(-2, "The chat session already exists.");
 
         // 3. Create chat session.
-        UserChatSession newChatSession = getUserChatSession(recipientInfo);
+        UserChatSession newChatSession = getUserChatSession(recipientInfo, currentUserId);
 
         userChatSessionMapper.insert(newChatSession);
 
         return ServiceResponse.buildSuccessResponse(newChatSession);
     }
 
-    private static UserChatSession getUserChatSession(AccountBaseInfo recipientInfo)
+    private static UserChatSession getUserChatSession(AccountBaseInfo recipientInfo, long currentUserId)
     {
-        long currentUserId = UserContextService.getCurrentUser().getId();
+        long recipientId = recipientInfo.getId();
         Date now = new Date();
         UserChatSession newChatSession = new UserChatSession();
         newChatSession.setUser1Id(currentUserId);
-        newChatSession.setUser2Id(recipientInfo.getId());
+        newChatSession.setUser2Id(recipientId);
         newChatSession.setStatus(1);
         newChatSession.setCreatorId(currentUserId);
         newChatSession.setCreationTime(now);
@@ -77,7 +80,7 @@ public class UserChatSessionService
             return ServiceResponse.buildErrorResponse(-1, "Invalid session id.");
 
         UserChatSessionInfo chatSession = userChatSessionMapper.getSessionInfoWithLastMessageById(sessionId);
-        if(chatSession == null)
+        if (chatSession == null)
             return ServiceResponse.buildErrorResponse(-1, "Session does not exist.");
 
         return ServiceResponse.buildSuccessResponse(chatSession);
@@ -114,7 +117,7 @@ public class UserChatSessionService
         if (userChatSessionMapper.deleteById(sessionId) != 1)
             return ServiceResponse.buildErrorResponse(-2, "Failed to delete session.");
 
-        // 3. Delete the user chat message.
+        // 3. Delete the user chat messages.
         userChatMessageMapper.deleteMessagesBySessionId(sessionId);
 
         return ServiceResponse.buildSuccessResponse(true);
