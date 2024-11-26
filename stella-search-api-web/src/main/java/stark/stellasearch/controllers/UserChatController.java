@@ -17,12 +17,10 @@ import stark.stellasearch.service.UserChatSessionService;
 @RequestMapping("/user-chat")
 public class UserChatController
 {
-    // TODO:
     // 1. Create a new chat session.
     // 2. Get chat session info with the last message.
     // 3. Get all chat session info from a user with the last message.
     // 4. Delete a chat session.
-
     // 5. Send messages.
     // 6. Get all messages from a chat.
 
