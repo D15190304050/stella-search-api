@@ -43,25 +43,24 @@ public class UserChatSessionService
             return ServiceResponse.buildErrorResponse(-1, "You cannot create a chat session with yourself.");
 
         // 2. Validate if the recipient name exists.
-        AccountBaseInfo recipientInfo = accountBaseInfoMapper.getAccountByUsername(recipientName);
-        if (recipientInfo == null)
+        Long recipientId = accountBaseInfoMapper.getIdByUsername(recipientName);
+        if (recipientId == null)
             return ServiceResponse.buildErrorResponse(-1, "The recipient does not exist.");
 
         // 3. Validate if the session already exists.
-        if (userChatSessionMapper.getSessionByUserIds(recipientInfo.getId(), currentUserId) != null)
+        if (userChatSessionMapper.getSessionByUserIds(recipientId, currentUserId) != null)
             return ServiceResponse.buildErrorResponse(-2, "The chat session already exists.");
 
         // 3. Create chat session.
-        UserChatSession newChatSession = getUserChatSession(recipientInfo, currentUserId);
+        UserChatSession newChatSession = getUserChatSession(recipientId, currentUserId);
 
         userChatSessionMapper.insert(newChatSession);
 
         return ServiceResponse.buildSuccessResponse(newChatSession);
     }
 
-    private static UserChatSession getUserChatSession(AccountBaseInfo recipientInfo, long currentUserId)
+    private static UserChatSession getUserChatSession(Long recipientId, long currentUserId)
     {
-        long recipientId = recipientInfo.getId();
         Date now = new Date();
         UserChatSession newChatSession = new UserChatSession();
         newChatSession.setUser1Id(currentUserId);

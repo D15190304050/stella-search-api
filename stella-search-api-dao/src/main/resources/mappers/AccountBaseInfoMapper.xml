@@ -81,4 +81,10 @@
         FROM `account_base_info`
         WHERE `id` = #{userId}
     </select>
+
+    <select id="getIdByUsername" resultType="java.lang.Long">
+        SELECT `id`
+        FROM `account_base_info`
+        WHERE `username` = #{username}
+    </select>
 </mapper>
