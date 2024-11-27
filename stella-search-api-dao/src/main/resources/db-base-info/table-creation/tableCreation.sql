@@ -45,18 +45,18 @@ CREATE TABLE `video_uploading_task`
 DROP TABLE IF EXISTS `user_video_info`;
 CREATE TABLE `user_video_info`
 (
-    `id`                 BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video.',
-    `name_in_oss` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Name of the corresponding object in OSS.',
-    `title`              VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'Title of the video.',
-    `cover_url`          VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'URL of the cover of the video.',
-    `creation_type_id`   BIGINT COMMENT 'Creation type of the video: 0 - Original; 1 - Reprint.',
-    `section_id`         BIGINT COMMENT 'ID of the section that the video belongs to.',
-    `label_ids`          VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Labels of the video, separated by ",", e.g., "Game,Challenge".',
-    `introduction`       VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Introduction to the video.',
-    `creator_id`         BIGINT                                                 NOT NULL COMMENT 'ID of the user who uploads the video.',
-    `creation_time`      DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
-    `modifier_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
-    `modification_time`  DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.',
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the video.',
+    `name_in_oss`       VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Name of the corresponding object in OSS.',
+    `title`             VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'Title of the video.',
+    `cover_url`         VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'URL of the cover of the video.',
+    `creation_type_id`  BIGINT COMMENT 'Creation type of the video: 0 - Original; 1 - Reprint.',
+    `section_id`        BIGINT COMMENT 'ID of the section that the video belongs to.',
+    `label_ids`         VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Labels of the video, separated by ",", e.g., "Game,Challenge".',
+    `introduction`      VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin         DEFAULT NULL COMMENT 'Introduction to the video.',
+    `creator_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the user who uploads the video.',
+    `creation_time`     DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the video uploading task.',
+    `modifier_id`       BIGINT                                                 NOT NULL COMMENT 'ID of the modifier of the video information, i.e., ID of the user who uploads the video information.',
+    `modification_time` DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Modification time of the video information.',
     KEY `idx_creator_id` (`creator_id`),
     KEY `idx_section_id` (`section_id`)
 )
@@ -221,6 +221,49 @@ CREATE TABLE `user_video_like`
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin
     COMMENT = 'Records of likes & dislikes of videos.';
+
+DROP TABLE IF EXISTS `user_chat_session`;
+CREATE TABLE `user_chat_session`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the user chat session.',
+    `user1_id`          BIGINT   NOT NULL COMMENT 'ID of the user1 who is in the chat.',
+    `user2_id`          BIGINT   NOT NULL COMMENT 'ID of the user2 who chats with user1.',
+    `state`             TINYINT  NOT NULL DEFAULT 1 COMMENT 'State of the chat session relationship: 0 - Blocked; 1 - Open.',
+    `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    UNIQUE (`user1_id`, `user2_id`),
+    KEY `idx_user1_id` (`user1_id`),
+    KEY `idx_user2_id` (`user2_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Records of user chat session.';
+
+
+DROP TABLE IF EXISTS `user_chat_message`;
+CREATE TABLE `user_chat_message`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the user chat message.',
+    `session_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the user chat session.',
+    `sender_id`         BIGINT                                                 NOT NULL COMMENT 'ID of the user who sends the message.',
+    `recipient_id`      BIGINT                                                 NOT NULL COMMENT 'ID of the user who receives the message.',
+    `content`           VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Content of the chat message.',
+    `state`             TINYINT                                                NOT NULL DEFAULT 0 COMMENT 'State of the chat message relationship: 0 - Sent; 1 - Read; 2 - Blocked by blacklist.',
+    `creator_id`        BIGINT                                                 NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT                                                 NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME                                               NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_session_id` (`session_id`),
+    KEY `idx_sender_id` (`sender_id`),
+    KEY `idx_receiver_id` (`recipient_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Records of user chat message.';
 
 DROP TABLE IF EXISTS `user_following`;
 CREATE TABLE `user_following`
