@@ -65,7 +65,7 @@ public class UserChatSessionService
         UserChatSession newChatSession = new UserChatSession();
         newChatSession.setUser1Id(currentUserId);
         newChatSession.setUser2Id(recipientId);
-        newChatSession.setStatus(1);
+        newChatSession.setState(1);
         newChatSession.setCreatorId(currentUserId);
         newChatSession.setCreationTime(now);
         newChatSession.setModifierId(currentUserId);

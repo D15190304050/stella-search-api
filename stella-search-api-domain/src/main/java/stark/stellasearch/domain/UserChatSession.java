@@ -9,5 +9,5 @@ public class UserChatSession extends DomainBase
 {
     private long user1Id;
     private long user2Id;
-    private int status;
+    private int state;
 }

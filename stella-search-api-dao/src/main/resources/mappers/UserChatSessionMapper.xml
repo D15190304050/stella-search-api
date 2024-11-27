@@ -4,9 +4,9 @@
 
     <insert id="insert" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO `user_chat_session`
-        (`user1_id`, `user2_id`, `creator_id`, `status`, `creation_time`, `modifier_id`, `modification_time`)
+        (`user1_id`, `user2_id`, `creator_id`, `state`, `creation_time`, `modifier_id`, `modification_time`)
         VALUES
-        (#{user1Id}, #{user2Id}, #{creatorId}, #{status}, #{creationTime}, #{modifierId}, #{modificationTime})
+        (#{user1Id}, #{user2Id}, #{creatorId}, #{state}, #{creationTime}, #{modifierId}, #{modificationTime})
     </insert>
 
     <delete id="deleteById">
@@ -18,7 +18,7 @@
         <result property="id" column="id"/>
         <result property="user1Id" column="user1_id"/>
         <result property="user2Id" column="user2_id"/>
-        <result property="status" column="status"/>
+        <result property="state" column="state"/>
         <result property="lastMessageSenderId" column="last_message_sender_id"/>
         <result property="lastMessage" column="last_message"/>
         <result property="lastMessageTime" column="last_message_time"/>
@@ -28,11 +28,11 @@
         SELECT ucs.`id`          AS `id`,
                ucs.`user1_id`    AS `user1_id`,
                ucs.`user2_id`    AS `user2_id`,
-               ucs.`status`      AS `status`,
+               ucs.`state`      AS `state`,
                ucm.`content`     AS `last_message`,
                ucm.`sender_id`   AS `last_message_sender_id`,
                ucm.creation_time AS `last_message_time`
-        FROM (SELECT `id`, `user1_id`, `user2_id`, `status`
+        FROM (SELECT `id`, `user1_id`, `user2_id`, `state`
               FROM `user_chat_session`
               WHERE `id` = #{id}) ucs
                  LEFT JOIN (SELECT `id`, `session_id`, `creation_time`, `content`, `sender_id`
@@ -47,11 +47,11 @@
         SELECT ucs.`id`          AS `id`,
                ucs.`user1_id`    AS `user1_id`,
                ucs.`user2_id`    AS `user2_id`,
-               ucs.`status`      AS `status`,
+               ucs.`state`      AS `state`,
                ucm.`content`     AS `last_message`,
                ucm.`sender_id`   AS `last_message_sender_id`,
                ucm.creation_time AS `last_message_time`
-        FROM (SELECT `id`, `user1_id`, `user2_id`, `status`
+        FROM (SELECT `id`, `user1_id`, `user2_id`, `state`
               FROM `user_chat_session`
               WHERE `user1_id` = #{userId}
                  OR `user2_id` = #{userId}) ucs
@@ -76,7 +76,7 @@
         <result property="id" column="id"/>
         <result property="user1Id" column="user1_id"/>
         <result property="user2Id" column="user2_id"/>
-        <result property="status" column="status"/>
+        <result property="state" column="state"/>
         <result property="creatorId" column="creator_id"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modifierId" column="modifier_id"/>
@@ -88,7 +88,7 @@
                `user1_id`,
                `user2_id`,
                `creator_id`,
-               `status`,
+               `state`,
                `creation_time`,
                `modifier_id`,
                `modification_time`

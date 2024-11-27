@@ -228,7 +228,7 @@ CREATE TABLE `user_chat_session`
     `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the user chat session.',
     `user1_id`          BIGINT   NOT NULL COMMENT 'ID of the user1 who is in the chat.',
     `user2_id`          BIGINT   NOT NULL COMMENT 'ID of the user2 who chats with user1.',
-    `status`            TINYINT  NOT NULL DEFAULT 1 COMMENT 'Status of the chat session relationship: 0 - Blocked; 1 - Open.',
+    `state`            TINYINT  NOT NULL DEFAULT 1 COMMENT 'State of the chat session relationship: 0 - Blocked; 1 - Open.',
     `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
     `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
     `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
