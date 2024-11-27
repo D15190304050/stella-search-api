@@ -50,11 +50,11 @@
                 <scope>import</scope>
             </dependency>
 
-            <dependency>
-                <groupId>stark.coderaider</groupId>
-                <artifactId>cygnus-commons</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>stark.coderaider</groupId>-->
+<!--                <artifactId>cygnus-commons</artifactId>-->
+<!--                <version>0.0.1-SNAPSHOT</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
