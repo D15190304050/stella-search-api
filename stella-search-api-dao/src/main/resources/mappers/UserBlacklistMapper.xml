@@ -4,11 +4,25 @@
     <resultMap type="stark.stellasearch.domain.UserBlacklist" id="UserBlacklistResultMap">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
-        <result property="blackedUserId" column="blacked_user_id"/>
+        <result property="blockedUserId" column="blocked_user_id"/>
         <result property="creatorId" column="creator_id"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modifierId" column="modifier_id"/>
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `user_blacklist`
+        (`user_id`, `blocked_user_id`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`)
+        VALUES
+        (#{userId}, #{blockedUserId}, #{creatorId}, #{creationTime}, #{modifierId}, #{modificationTime})
+    </insert>
+
+    <select id="countByUserIds" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM `user_blacklist`
+        WHERE `user_id` = #{userId}
+        AND `blocked_user_id` = #{blockedUserId}
+    </select>
 
 </mapper>

@@ -8,5 +8,5 @@ import lombok.EqualsAndHashCode;
 public class UserBlacklist extends DomainBase
 {
     private long userId;
-    private long blackedUserId;
+    private long blockedUserId;
 }

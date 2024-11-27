@@ -13,4 +13,5 @@ public interface AccountBaseInfoMapper
     int updatePasswordByUsername(@Param("username") String username, @Param("encryptedPassword") String encryptedPassword);
     List<AccountBaseInfo> getByUsernamePhoneNumberEmail(@Param("username") String username, @Param("phoneNumber") String phoneNumber, @Param("phoneNumberPrefix") String phoneNumberPrefix, @Param("email") String email);
     int insert(AccountBaseInfo accountBaseInfo);
+    Long getUserIdByUsername(String username);
 }

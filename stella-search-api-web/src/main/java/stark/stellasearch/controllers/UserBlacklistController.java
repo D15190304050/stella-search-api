@@ -2,9 +2,14 @@ package stark.stellasearch.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import stark.stellasearch.dto.params.BlockUserRequest;
 import stark.stellasearch.service.UserBlacklistService;
+import stark.dataworks.boot.web.ServiceResponse;
+
 
 @Controller
 @ResponseBody
@@ -19,4 +24,12 @@ public class UserBlacklistController
 
     @Autowired
     private UserBlacklistService userBlacklistService;
+
+    @PostMapping("/block")
+    public ServiceResponse<Boolean> blockUser(@RequestBody BlockUserRequest request)
+    {
+        return userBlacklistService.blockUserByUsername(request);
+    }
+
+
 }
