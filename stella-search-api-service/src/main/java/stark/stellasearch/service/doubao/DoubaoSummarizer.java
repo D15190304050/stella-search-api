@@ -53,6 +53,7 @@ public class DoubaoSummarizer
         List<String> labels = Arrays.asList(labelsText.substring(1, labelsText.length() - 1).split("、"));
 
         TranscriptSummary transcriptSummary = new TranscriptSummary();
+        transcriptSummary.setCanSummary(true);
         transcriptSummary.setSummary(summary);
         transcriptSummary.setLabels(labels);
         transcriptSummary.setContentStructures(contentStructures);

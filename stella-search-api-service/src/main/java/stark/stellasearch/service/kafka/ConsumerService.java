@@ -8,8 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import stark.dataworks.basic.data.json.JsonSerializer;
 import stark.dataworks.boot.autoconfig.minio.EasyMinio;
+import stark.stellasearch.dao.UserVideoInfoMapper;
+import stark.stellasearch.domain.UserVideoInfo;
+import stark.stellasearch.domain.entities.es.VideoSummaryInfo;
 import stark.stellasearch.dto.params.VideoSummaryEndMessage;
 import stark.stellasearch.dto.results.TranscriptSummary;
 import stark.stellasearch.service.doubao.DoubaoSummarizer;
@@ -24,14 +28,22 @@ import java.security.NoSuchAlgorithmException;
 @Component
 public class ConsumerService
 {
+    public static final long SUMMARY_THRESHOLD = 1000;
+
     @Value("${dataworks.easy-minio.bucket-name-video-subtitles}")
     private String bucketNameVideoSubtitles;
+
+    @Value("${dataworks.easy-minio.bucket-name-summaries}")
+    private String bucketNameSummaries;
 
     @Autowired
     private EasyMinio easyMinio;
 
     @Autowired
     private DoubaoSummarizer doubaoSummarizer;
+
+    @Autowired
+    private UserVideoInfoMapper userVideoInfoMapper;
 
     @KafkaListener(topics = {"${spring.kafka.consumer.topic-summary-video-end}"},
             groupId = "${spring.kafka.consumer.group-id}",
@@ -49,10 +61,16 @@ public class ConsumerService
             String subtitleObjectName = summaryEndMessage.getSubtitleObjectName();
 
             String transcript = getTranscript(subtitleObjectName);
-
-            TranscriptSummary summary = doubaoSummarizer.summarize(transcript);
-
-            log.info("Summary = {}", JsonSerializer.serialize(summary));
+            if (StringUtils.hasText(transcript) && transcript.length() > SUMMARY_THRESHOLD)
+            {
+                TranscriptSummary summary = doubaoSummarizer.summarize(transcript);
+                log.info("Summary = {}", JsonSerializer.serialize(summary));
+            }
+            else
+            {
+                TranscriptSummary summary = new TranscriptSummary();
+                summary.setCanSummary(false);
+            }
         }
         catch (Exception e)
         {
@@ -73,5 +91,21 @@ public class ConsumerService
         return new String(byteContent, StandardCharsets.UTF_8);
     }
 
+    private void saveSummary(long videoId, TranscriptSummary transcriptSummary)
+    {
+        VideoSummaryInfo videoSummaryInfo = toVideoSummaryInfo(videoId, transcriptSummary);
+    }
+
+    private VideoSummaryInfo toVideoSummaryInfo(long videoId, TranscriptSummary transcriptSummary)
+    {
+        UserVideoInfo userVideoInfo = userVideoInfoMapper.getVideoBaseInfoById(videoId);
+        VideoSummaryInfo videoSummaryInfo = new VideoSummaryInfo();
+        videoSummaryInfo.setVideoId(videoId);
+        videoSummaryInfo.setTitle(userVideoInfo.getTitle());
+        videoSummaryInfo.setIntroduction(userVideoInfo.getIntroduction());
+        videoSummaryInfo.setSummary(transcriptSummary.getSummary());
+        videoSummaryInfo.setLabels(transcriptSummary.getLabels());
+        return videoSummaryInfo;
+    }
 }
 
