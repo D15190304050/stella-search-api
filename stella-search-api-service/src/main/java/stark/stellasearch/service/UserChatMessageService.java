@@ -44,13 +44,13 @@ public class UserChatMessageService
             return ServiceResponse.buildErrorResponse(-2, "User session does not exist.");
 
         // 3. Send message.
-        UserChatMessage userChatMessage = getUserChatMessage(request, currentUserId, sessionId);
+        UserChatMessage userChatMessage = sendChatMessageToRecipient(request, currentUserId, sessionId);
 
         // 4. Return the message id.
         return ServiceResponse.buildSuccessResponse(userChatMessage.getId());
     }
 
-    private UserChatMessage getUserChatMessage(SendUserChatMessageRequest request, long currentUserId, long sessionId)
+    private UserChatMessage sendChatMessageToRecipient(SendUserChatMessageRequest request, long currentUserId, long sessionId)
     {
         Date now = new Date();
         UserChatMessage userChatMessage = new UserChatMessage();
@@ -58,6 +58,7 @@ public class UserChatMessageService
         userChatMessage.setRecipientId(request.getRecipientId());
         userChatMessage.setContent(request.getContent());
         userChatMessage.setSessionId(sessionId);
+        userChatMessage.setState(0);
         userChatMessage.setCreationTime(now);
         userChatMessage.setCreatorId(currentUserId);
         userChatMessage.setModificationTime(now);

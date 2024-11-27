@@ -11,4 +11,5 @@ public class UserChatMessage extends DomainBase
     private long senderId;
     private long recipientId;
     private String content;
+    private int state;
 }

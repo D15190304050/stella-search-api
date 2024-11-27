@@ -4,9 +4,9 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user_chat_message`
-        (`session_id`, `sender_id`, `recipient_id`, `content`, `creator_id`, `creation_time`, `modifier_id`,
+        (`session_id`, `sender_id`, `recipient_id`, `content`, `state`, `creator_id`, `creation_time`, `modifier_id`,
          `modification_time`)
-        VALUES (#{sessionId}, #{senderId}, #{recipientId}, #{content}, #{creatorId}, #{creationTime}, #{modifierId},
+        VALUES (#{sessionId}, #{senderId}, #{recipientId}, #{content}, #{state}, #{creatorId}, #{creationTime}, #{modifierId},
                 #{modificationTime})
     </insert>
 
@@ -21,6 +21,7 @@
         <result property="senderId" column="sender_id"/>
         <result property="recipientId" column="recipient_id"/>
         <result property="content" column="content"/>
+        <result property="state" column="state"/>
         <result property="creatorId" column="creator_id"/>
         <result property="creationTime" column="creation_time"/>
         <result property="modifierId" column="modifier_id"/>
@@ -33,6 +34,7 @@
                `sender_id`,
                `recipient_id`,
                `content`,
+               `state`,
                `creator_id`,
                `creation_time`,
                `modifier_id`,
