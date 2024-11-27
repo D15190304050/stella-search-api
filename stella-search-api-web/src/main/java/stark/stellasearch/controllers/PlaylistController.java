@@ -14,14 +14,6 @@ import java.util.List;
 @RequestMapping("/playlist")
 public class PlaylistController
 {
-    // TODO: Implement playlist controller
-    // 1. 将视频加入收藏夹(默认收藏夹)--
-    // 2. 将视频从收藏夹中移除--
-    // 3. 添加收藏夹--
-    // 4. 删除收藏夹（连同删除视频）--
-    // 5. 修改收藏夹信息--
-    // 6. 展示收藏夹列表--
-    // 7. 展示收藏夹中的视频列表--
     @Autowired
     private PlaylistService playlistService;
 
