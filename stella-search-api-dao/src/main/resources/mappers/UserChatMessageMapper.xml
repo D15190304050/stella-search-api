@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="stark.stellasearch.dao.UserChatMessageMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `user_chat_message`
+        (`session_id`, `sender_id`, `recipient_id`, `content`, `state`, `creator_id`, `creation_time`, `modifier_id`,
+         `modification_time`)
+        VALUES (#{sessionId}, #{senderId}, #{recipientId}, #{content}, #{state}, #{creatorId}, #{creationTime}, #{modifierId},
+                #{modificationTime})
+    </insert>
+
+    <delete id="deleteMessagesBySessionId">
+        DELETE FROM `user_chat_message`
+        WHERE `session_id` = #{sessionId}
+    </delete>
+
+    <resultMap id="UserChatMessageMap" type="stark.stellasearch.domain.UserChatMessage">
+        <result property="id" column="id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="recipientId" column="recipient_id"/>
+        <result property="content" column="content"/>
+        <result property="state" column="state"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creationTime" column="creation_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modificationTime" column="modification_time"/>
+    </resultMap>
+
+    <select id="getMessagesBySessionId" resultMap="UserChatMessageMap">
+        SELECT `id`,
+               `session_id`,
+               `sender_id`,
+               `recipient_id`,
+               `content`,
+               `state`,
+               `creator_id`,
+               `creation_time`,
+               `modifier_id`,
+               `modification_time`
+        FROM `user_chat_message`
+        WHERE `session_id` = #{sessionId}
+        ORDER BY `id` DESC
+            LIMIT #{pageCapacity}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countMessagesBySessionId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM `user_chat_message`
+        WHERE `session_id` = #{sessionId}
+    </select>
+</mapper>

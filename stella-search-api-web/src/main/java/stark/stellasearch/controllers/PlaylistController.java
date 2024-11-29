@@ -14,6 +14,15 @@ import java.util.List;
 @RequestMapping("/playlist")
 public class PlaylistController
 {
+    // TODO: Implement playlist controller
+    // 1. Put a video into a playlist.
+    // 2. Remove a video from a playlist.
+    // 3. Create a new playlist.
+    // 4. Delete a playlist with videos.
+    // 5. Modify a playlist.
+    // 6. List all playlists.
+    // 7. Show favorites by playlist.
+
     @Autowired
     private PlaylistService playlistService;
 

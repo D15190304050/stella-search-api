@@ -31,6 +31,8 @@ public class SecurityConstants
                     "/account/validate-token",
                     "/video/cover/*",
                     "/video/play",
-                    "/comment/list"
+                    "/comment/list",
+                    "user-following/following-list",
+                    "user-following/follower-list"
             };
 }
