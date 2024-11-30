@@ -120,7 +120,7 @@ public class UserBlacklistService
         return ServiceResponse.buildSuccessResponse(true);
     }
 
-    public ServiceResponse<List<UserBlacklistInfo>> getBlacklistOfCurrentUser(@Valid GetBlacklistRequest request)
+    public ServiceResponse<PaginatedData<UserBlacklistInfo>> getBlacklistOfCurrentUser(@Valid GetBlacklistRequest request)
     {
         long currentUserId = UserContextService.getCurrentUser().getId();
         GetUserBlacklistQueryParam queryParam = new GetUserBlacklistQueryParam();
@@ -132,7 +132,7 @@ public class UserBlacklistService
         PaginatedData<UserBlacklistInfo> paginatedData = new PaginatedData<>();
         paginatedData.setData(blacklistOfCurrentUser);
         paginatedData.setTotal(totalBlockedUsers);
-        ServiceResponse<List<UserBlacklistInfo>> response = ServiceResponse.buildSuccessResponse(blacklistOfCurrentUser);
+        ServiceResponse<PaginatedData<UserBlacklistInfo>> response = ServiceResponse.buildSuccessResponse(paginatedData);
         response.putExtra("size", blacklistOfCurrentUser.size());
 
         return response;

@@ -3,7 +3,7 @@ package stark.stellasearch.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import stark.stellasearch.domain.UserBlacklist;
+import stark.dataworks.boot.web.PaginatedData;
 import stark.stellasearch.dto.params.BlockUserRequest;
 import stark.stellasearch.dto.params.GetBlacklistRequest;
 import stark.stellasearch.dto.params.UnblockUserRequest;
@@ -11,7 +11,6 @@ import stark.stellasearch.dto.results.UserBlacklistInfo;
 import stark.stellasearch.service.UserBlacklistService;
 import stark.dataworks.boot.web.ServiceResponse;
 
-import java.util.List;
 
 @Controller
 @ResponseBody
@@ -39,7 +38,7 @@ public class UserBlacklistController
     }
 
     @GetMapping("/list")
-    public ServiceResponse<List<UserBlacklistInfo>> getBlacklistOfCurrentUser(@ModelAttribute GetBlacklistRequest request)
+    public ServiceResponse<PaginatedData<UserBlacklistInfo>> getBlacklistOfCurrentUser(@ModelAttribute GetBlacklistRequest request)
     {
         return userBlacklistService.getBlacklistOfCurrentUser(request);
     }

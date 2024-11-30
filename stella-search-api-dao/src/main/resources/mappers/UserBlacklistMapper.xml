@@ -15,7 +15,7 @@
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="blockedUserId" column="blocked_user_id"/>
-        <result property="blockedUserName" column="blocked_User_Name"/>
+        <result property="blockedUsername" column="blocked_User_Name"/>
         <result property="blockedTime" column="blocked_time"/>
     </resultMap>
 

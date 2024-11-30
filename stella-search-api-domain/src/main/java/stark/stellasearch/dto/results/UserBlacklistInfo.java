@@ -10,6 +10,6 @@ public class UserBlacklistInfo
     private long id;
     private long userId;
     private long blockedUserId;
-    private String blockedUserName;
+    private String blockedUsername;
     private Date blockedTime;
 }
