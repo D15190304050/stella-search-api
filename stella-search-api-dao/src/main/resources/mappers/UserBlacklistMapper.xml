@@ -11,6 +11,14 @@
         <result property="modificationTime" column="modification_time"/>
     </resultMap>
 
+    <resultMap type="stark.stellasearch.dto.results.UserBlacklistInfo" id="UserBlacklistInfoResultMap">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="blockedUserId" column="blocked_user_id"/>
+        <result property="blockedUserName" column="blocked_User_Name"/>
+        <result property="blockedTime" column="blocked_time"/>
+    </resultMap>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user_blacklist`
         (`user_id`, `blocked_user_id`, `creator_id`, `creation_time`, `modifier_id`, `modification_time`)
@@ -18,11 +26,36 @@
         (#{userId}, #{blockedUserId}, #{creatorId}, #{creationTime}, #{modifierId}, #{modificationTime})
     </insert>
 
+    <delete id="deleteByUserIds">
+        DELETE FROM `user_blacklist`
+        WHERE `user_id` = #{userId}
+        AND `blocked_user_id` = #{blockedUserId}
+    </delete>
+
     <select id="countByUserIds" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM `user_blacklist`
         WHERE `user_id` = #{userId}
         AND `blocked_user_id` = #{blockedUserId}
+    </select>
+
+    <select id="getByUserIds" resultMap="UserBlacklistInfoResultMap">
+        SELECT ubl.`id`,
+               ubl.`user_id`,
+               ubl.`blocked_user_id`,
+               (SELECT `username`
+                FROM account_base_info AS abi
+                WHERE abi.id = ubl.`blocked_user_id`) AS `blocked_user_name`,
+               ubl.`creation_time`                    AS `blocked_time`
+        FROM `user_blacklist` AS `ubl`
+        WHERE ubl.`user_id` = #{currentUserId} LIMIT #{pageCapacity}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countBlockedUsersByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM `user_blacklist`
+        WHERE `user_id` = #{userId}
     </select>
 
 </mapper>

@@ -17,5 +17,4 @@ public interface AccountBaseInfoMapper
     int countByUsername(String username);
     int countByUserId(long userId);
     Long getIdByUsername(String username);
-    Long getUserIdByUsername(String username);
 }
