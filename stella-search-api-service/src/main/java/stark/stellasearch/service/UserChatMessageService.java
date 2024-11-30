@@ -3,6 +3,7 @@ package stark.stellasearch.service;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.stereotype.Service;
 import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
@@ -21,6 +22,9 @@ import java.util.List;
 @Slf4j
 public class UserChatMessageService
 {
+    private final static int SENT = 0;
+    private final static int BLOCKED = 2;
+
     @Autowired
     private AccountBaseInfoMapper accountBaseInfoMapper;
 
@@ -43,14 +47,21 @@ public class UserChatMessageService
         if (sessionId <= 0)
             return ServiceResponse.buildErrorResponse(-2, "User session does not exist.");
 
-        // 3. Send message.
-        UserChatMessage userChatMessage = sendChatMessageToRecipient(request, currentUserId, sessionId);
+        // TODO: 3. Validate if the recipient blocked the current user.
+        int state = 0;
+        if (state == 0)
+            state = SENT;
+        else
+            state = BLOCKED;
 
-        // 4. Return the message id.
+        // 4. Send message.
+        UserChatMessage userChatMessage = sendChatMessageToRecipient(request, currentUserId, sessionId, state);
+
+        // 5. Return the message id.
         return ServiceResponse.buildSuccessResponse(userChatMessage.getId());
     }
 
-    private UserChatMessage sendChatMessageToRecipient(SendUserChatMessageRequest request, long currentUserId, long sessionId)
+    private UserChatMessage sendChatMessageToRecipient(SendUserChatMessageRequest request, long currentUserId, long sessionId, int state)
     {
         Date now = new Date();
         UserChatMessage userChatMessage = new UserChatMessage();
@@ -58,7 +69,7 @@ public class UserChatMessageService
         userChatMessage.setRecipientId(request.getRecipientId());
         userChatMessage.setContent(request.getContent());
         userChatMessage.setSessionId(sessionId);
-        userChatMessage.setState(0);
+        userChatMessage.setState(state);
         userChatMessage.setCreationTime(now);
         userChatMessage.setCreatorId(currentUserId);
         userChatMessage.setModificationTime(now);
