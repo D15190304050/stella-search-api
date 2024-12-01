@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import stark.stellasearch.dao.es.queryers.VideoSummaryInfoQueryer;
 import stark.stellasearch.service.doubao.DoubaoMultiRoundChatSessionFactory;
 import stark.stellasearch.service.VideoUploadingOptionHolder;
 
@@ -27,10 +28,12 @@ public class StartupInitializer implements ApplicationContextAware, ApplicationL
     @Autowired
     private VideoUploadingOptionHolder videoUploadingOptionHolder;
 
+    @Autowired
+    private VideoSummaryInfoQueryer videoSummaryInfoQueryer;
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
     {
-
     }
 
     @Override
@@ -38,11 +41,16 @@ public class StartupInitializer implements ApplicationContextAware, ApplicationL
     {
         try
         {
+            // Initialize doubao configurations.
             String doubaoApiKey = System.getenv(doubaoApiKeyEnvironmentVariableName);
             doubaoMultiRoundChatSessionFactory.setDoubaoApiKey(doubaoApiKey);
             doubaoMultiRoundChatSessionFactory.setArkService(ArkService.builder().apiKey(doubaoApiKey).build());
 
+            // Initialize video uploading options.
             videoUploadingOptionHolder.setVideoUploadingOptions();
+
+            // Initialize query params for VideoSummaryInfo in ES.
+            videoSummaryInfoQueryer.setQueryFields(ElasticsearchInitializer.getQueryFieldsOfVideoSummaryInfo());
         }
         catch (IllegalAccessException e)
         {

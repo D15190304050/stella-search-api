@@ -449,4 +449,10 @@
         WHERE uvi.`title` IS NOT NULL
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
+
+    <update id="setVideoSummaryFileNameById">
+        UPDATE `user_video_info`
+        SET summary_file_name = #{summaryFileName}
+        WHERE `id` = #{id}
+    </update>
 </mapper>
