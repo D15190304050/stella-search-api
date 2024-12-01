@@ -3,6 +3,7 @@ package stark.stellasearch.dto.results;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class VideoPlayInfo
@@ -23,4 +24,6 @@ public class VideoPlayInfo
     private String videoPlayUrl;
     private boolean userLikes;
     private boolean userFavorites;
+    private List<String> labels;
+    private String summary;
 }

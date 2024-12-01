@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class GetVideoInfosByKeywordQueryParam extends PaginationQueryParam
+public class SearchVideoQueryParam extends PaginationQueryParam
 {
     private String keyword;
 }

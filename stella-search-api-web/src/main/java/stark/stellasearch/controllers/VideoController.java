@@ -118,12 +118,6 @@ public class VideoController
         return videoService.cancelLikeVideo(request);
     }
 
-    @GetMapping("/search-video")
-    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@ModelAttribute SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
-        return videoService.searchVideo(request);
-    }
-
     @GetMapping("/in-playlist")
     public ServiceResponse<PaginatedData<VideoPlayInfo>> getVideoPlayInfoInPlaylist(@ModelAttribute GetVideoPlayInfoInPlaylistRequest request)
     {

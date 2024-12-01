@@ -287,9 +287,10 @@ public class VideoService
             try
             {
                 easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
-            } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
-                     NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
-                     InternalException e)
+            }
+            catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                   NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
+                   InternalException e)
             {
                 throw new RuntimeException(e);
             }
@@ -599,34 +600,6 @@ public class VideoService
             return "Insert record to table of video play count failed";
 
         return null;
-    }
-
-    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@Valid SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
-        String keyword = request.getKeyword();
-        long videoCountByKeyword = userVideoInfoMapper.countVideoByKeyword(keyword);
-        if (videoCountByKeyword == 0)
-            return ServiceResponse.buildSuccessResponse(new PaginatedData<>());
-
-        GetVideoInfosByKeywordQueryParam queryParam = new GetVideoInfosByKeywordQueryParam();
-        queryParam.setKeyword(keyword);
-        queryParam.setPaginationParam(request);
-
-        List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByKeyword(queryParam);
-        for (VideoPlayInfo videoPlayInfo : videoPlayInfos)
-        {
-            String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
-            videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
-        }
-
-        PaginatedData<VideoPlayInfo> paginatedData = new PaginatedData<>();
-        paginatedData.setData(videoPlayInfos);
-        paginatedData.setTotal(videoCountByKeyword);
-
-        ServiceResponse<PaginatedData<VideoPlayInfo>> response = ServiceResponse.buildSuccessResponse(paginatedData);
-        response.putExtra("size", videoPlayInfos.size());
-
-        return response;
     }
 
     // TODO: Add visible options for playlists belonging to others.
