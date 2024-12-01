@@ -21,13 +21,17 @@ public final class ElasticsearchInitializer
         for (Field field : fields)
         {
             org.springframework.data.elasticsearch.annotations.Field fieldAnnotation = field.getAnnotation(org.springframework.data.elasticsearch.annotations.Field.class);
-            if (fieldAnnotation != null && fieldAnnotation.type() == FieldType.Text)
+            if (fieldAnnotation != null)
             {
-                Boost boost = field.getAnnotation(Boost.class);
-                if (boost == null)
-                    queryFields.add(field.getName());
-                else
-                    queryFields.add(field.getName() + "^" + boost.value());
+                if (fieldAnnotation.type() == FieldType.Text ||
+                    fieldAnnotation.type() == FieldType.Keyword)
+                {
+                    Boost boost = field.getAnnotation(Boost.class);
+                    if (boost == null)
+                        queryFields.add(field.getName());
+                    else
+                        queryFields.add(field.getName() + "^" + boost.value());
+                }
             }
         }
 

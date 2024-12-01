@@ -3,11 +3,13 @@ package stark.stellasearch.service;
 import io.minio.errors.*;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import stark.dataworks.basic.data.redis.RedisQuickOperation;
 import stark.dataworks.boot.autoconfig.minio.EasyMinio;
@@ -27,6 +29,7 @@ import stark.stellasearch.service.redis.RedisKeyManager;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -72,9 +75,12 @@ public class VideoSearchService
         queryParam.setPaginationParam(request);
 
         ElasticsearchResult<VideoSummaryInfo> searchResult = videoSummaryInfoQueryer.searchVideo(queryParam);
+        List<VideoSummaryInfo> summaryInfos = searchResult.getData();
+
+        if (CollectionUtils.isEmpty(summaryInfos))
+            return emptySearchResult(searchResult);
 
         long userId = UserContextService.getCurrentUser().getId();
-        List<VideoSummaryInfo> summaryInfos = searchResult.getData();
         List<Long> videoIds = summaryInfos.stream().map(VideoSummaryInfo::getVideoId).toList();
         List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByIds(videoIds, userId);
 
@@ -90,6 +96,15 @@ public class VideoSearchService
 
         latch.await();
         return response;
+    }
+
+    @NotNull
+    private static ServiceResponse<PaginatedData<VideoPlayInfo>> emptySearchResult(ElasticsearchResult<VideoSummaryInfo> searchResult)
+    {
+        PaginatedData<VideoPlayInfo> paginatedData = new PaginatedData<>();
+        paginatedData.setTotal(searchResult.getTotal());
+        paginatedData.setData(new ArrayList<>());
+        return ServiceResponse.buildSuccessResponse(paginatedData);
     }
 
     private static void setSummaryInfo(List<VideoPlayInfo> videoPlayInfos, List<VideoSummaryInfo> summaryInfos)
