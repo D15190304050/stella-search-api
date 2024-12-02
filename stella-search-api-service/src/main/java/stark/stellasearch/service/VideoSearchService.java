@@ -47,9 +47,6 @@ public class VideoSearchService
     private String bucketNameVideos;
 
     @Autowired
-    private VideoSummaryInfoRepository videoSummaryInfoRepository;
-
-    @Autowired
     private VideoSummaryInfoQueryer videoSummaryInfoQueryer;
 
     @Autowired
@@ -84,7 +81,9 @@ public class VideoSearchService
         List<Long> videoIds = summaryInfos.stream().map(VideoSummaryInfo::getVideoId).toList();
         List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByIds(videoIds, userId);
 
-        CountDownLatch latch = getVideoPlayUrls(videoPlayInfos);
+        // There is no need to get video play URL here because frontend will request for video play URL
+        // when entering video play page.
+//        CountDownLatch latch = getVideoPlayUrls(videoPlayInfos);
         setSummaryInfo(videoPlayInfos, summaryInfos);
 
         PaginatedData<VideoPlayInfo> paginatedData = new PaginatedData<>();
@@ -94,7 +93,7 @@ public class VideoSearchService
         ServiceResponse<PaginatedData<VideoPlayInfo>> response = ServiceResponse.buildSuccessResponse(paginatedData);
         response.putExtra("size", videoPlayInfos.size());
 
-        latch.await();
+//        latch.await();
         return response;
     }
 

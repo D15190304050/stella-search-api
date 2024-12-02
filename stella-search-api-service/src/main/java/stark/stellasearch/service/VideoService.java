@@ -28,6 +28,8 @@ import stark.stellasearch.service.dto.User;
 import stark.stellasearch.service.kafka.ProducerService;
 
 import jakarta.validation.Valid;
+import stark.stellasearch.service.redis.RedisKeyManager;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -80,6 +82,9 @@ public class VideoService
 
     @Autowired
     private UserVideoFavoritesMapper userVideoFavoritesMapper;
+
+    @Autowired
+    private RedisKeyManager redisKeyManager;
 
     private String generateTaskId(long userId)
     {
@@ -516,7 +521,16 @@ public class VideoService
         if (videoPlayInfo == null)
             return ServiceResponse.buildErrorResponse(-7, "Invalid video ID: " + videoId);
 
-        String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
+        String videoPlayUrlKey = redisKeyManager.getVideoPlayUrlKey(videoId);
+        String videoPlayUrl = redisQuickOperation.get(videoPlayUrlKey);
+
+        // TODO: We may need a distributed lock here to prevent concurrent query of same object urls.
+        if (videoPlayUrl == null)
+        {
+            videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
+            redisQuickOperation.set(videoPlayUrlKey, videoPlayUrl, 5, TimeUnit.MINUTES);
+        }
+
         videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
 
         String errorMessage = saveVideoPlayRecord(videoPlayInfo);
