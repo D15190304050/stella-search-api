@@ -14,4 +14,5 @@ public class UserFollowingInfo
     private Date followingTime;
     private long followingCount;
     private long followerCount;
+    private boolean followState;
 }

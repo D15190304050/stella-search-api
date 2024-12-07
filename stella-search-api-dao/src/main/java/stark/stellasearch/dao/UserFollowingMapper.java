@@ -11,12 +11,13 @@ import java.util.List;
 @Mapper
 public interface UserFollowingMapper
 {
-    UserFollowing getByUserIDAndFollowedUserID(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
+    UserFollowing getByUserIdAndFollowedUserId(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
     int insert(UserFollowing userFollowing);
     int deleteByUserIdAndFollowedUserId(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
-    List<UserFollowingInfo> getFollowingList(GetUserFollowingListQueryParam queryParam);
-    long countFollowingUsersByUsername(String username);
-    List<UserFollowingInfo> getFollowerList(GetUserFollowingListQueryParam queryParam);
-    long countFollowersByUsername(String username);
-    int countByUsernameAndFollowedUsername(@Param("ifFollowingUsername") String ifFollowingUsername, @Param("currentUsername") String currentUsername);
+    List<UserFollowingInfo> getFollowings(GetUserFollowingListQueryParam queryParam);
+    long countFollowingUsersByUserId(long userId);
+    List<UserFollowingInfo> getFollowers(GetUserFollowingListQueryParam queryParam);
+    long countFollowersByUserId(long userId);
+    long countByUsernameAndFollowedUsername(@Param("ifFollowingUsername") String ifFollowingUsername, @Param("currentUsername") String currentUsername);
+    long countUserFollowingsByUserIds(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
 }

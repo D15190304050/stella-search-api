@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GetUserFollowingListRequest extends PaginationRequestParam
+public class GetFollowersRequest extends PaginationRequestParam
 {
-    private String username;
 }

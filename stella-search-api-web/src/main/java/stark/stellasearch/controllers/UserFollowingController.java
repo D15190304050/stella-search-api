@@ -6,10 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
-import stark.stellasearch.dto.params.CheckIfFollowingRequest;
-import stark.stellasearch.dto.params.GetUserFollowingListRequest;
-import stark.stellasearch.dto.params.UserFollowingRequest;
-import stark.stellasearch.dto.params.UserUnfollowingRequest;
+import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.UserFollowingInfo;
 import stark.stellasearch.service.UserFollowingService;
 
@@ -25,31 +22,32 @@ public class UserFollowingController
     // 3. Get the user's following list.
     // 4. Get the user's follower list.
     // 5. Check if the current user is following another user.
+
     @Autowired
     private UserFollowingService userFollowingService;
 
     @PostMapping("/follow")
-    public ServiceResponse<Boolean> userFollowing(@RequestBody UserFollowingRequest request)
+    public ServiceResponse<Boolean> followUser(@RequestBody FollowUserRequest request)
     {
-        return userFollowingService.follow(request);
+        return userFollowingService.followUser(request);
     }
 
     @PostMapping("/unfollow")
-    public ServiceResponse<Boolean> userUnfollowing(@RequestBody UserUnfollowingRequest request)
+    public ServiceResponse<Boolean> unfollowUser(@RequestBody UnfollowUserRequest request)
     {
-        return userFollowingService.unfollow(request);
+        return userFollowingService.unfollowUser(request);
     }
 
-    @GetMapping("/following-list")
-    public ServiceResponse<PaginatedData<UserFollowingInfo>> getFollowingList(@ModelAttribute GetUserFollowingListRequest request)
+    @GetMapping("/followings")
+    public ServiceResponse<PaginatedData<UserFollowingInfo>> getFollowings(@ModelAttribute GetFollowingsRequest request)
     {
-        return userFollowingService.getFollowingList(request);
+        return userFollowingService.getFollowings(request);
     }
 
-    @GetMapping("/follower-list")
-    public ServiceResponse<PaginatedData<UserFollowingInfo>> getFollowerList(@ModelAttribute GetUserFollowingListRequest request)
+    @GetMapping("/followers")
+    public ServiceResponse<PaginatedData<UserFollowingInfo>> getFollowers(@ModelAttribute GetFollowersRequest request)
     {
-        return userFollowingService.getFollowerList(request);
+        return userFollowingService.getFollowers(request);
     }
 
     @GetMapping("/if-following")

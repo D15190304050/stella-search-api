@@ -7,5 +7,5 @@ import lombok.EqualsAndHashCode;
 @Data
 public class GetUserFollowingListQueryParam extends PaginationQueryParam
 {
-    private String username;
+    private long userId;
 }
