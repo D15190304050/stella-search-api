@@ -18,7 +18,6 @@ import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.UserVideoInfoMapper;
 import stark.stellasearch.dao.es.queryers.VideoSummaryInfoQueryer;
-import stark.stellasearch.dao.es.repositories.VideoSummaryInfoRepository;
 import stark.stellasearch.domain.entities.es.VideoSummaryInfo;
 import stark.stellasearch.dto.params.SearchVideoQueryParam;
 import stark.stellasearch.dto.params.SearchVideoRequest;

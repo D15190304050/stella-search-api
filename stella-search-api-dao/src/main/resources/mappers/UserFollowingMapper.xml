@@ -66,7 +66,7 @@
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 
-    <select id="countFollowingUsersByUserId" resultType="long">
+    <select id="countFollowingsByUserId" resultType="long">
         SELECT count(*)
         FROM `user_following`
         WHERE `user_id` = #{userId}

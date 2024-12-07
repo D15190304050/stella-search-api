@@ -92,7 +92,7 @@ public class UserFollowingService
 
         List<UserFollowingInfo> userFollowingInfoList = userFollowingMapper.getFollowings(userFollowingListQueryParam);
         userFollowingInfoList.forEach(x -> x.setFollowState(true));
-        long total = userFollowingMapper.countFollowingUsersByUserId(userId);
+        long total = userFollowingMapper.countFollowingsByUserId(userId);
         return assembleUserFollowingInfoResponse(userFollowingInfoList, total);
     }
 
