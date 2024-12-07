@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import stark.stellasearch.domain.UserFollowing;
 import stark.stellasearch.dto.params.GetUserFollowingListQueryParam;
+import stark.stellasearch.dto.results.UserFollowCount;
 import stark.stellasearch.dto.results.UserFollowingInfo;
 
 import java.util.List;
@@ -20,4 +21,5 @@ public interface UserFollowingMapper
     long countFollowersByUserId(long userId);
     long countByUserIdAndFollowedUserId(@Param("currentUserId") long currentUserId, @Param("followedUserId") long followedUserId);
     long countUserFollowingsByUserIds(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
+    UserFollowCount getUserFollowCount(long userId);
 }

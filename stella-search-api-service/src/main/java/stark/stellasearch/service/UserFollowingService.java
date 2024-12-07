@@ -6,12 +6,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
 import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.AccountBaseInfoMapper;
 import stark.stellasearch.dao.UserFollowingMapper;
 import stark.stellasearch.domain.UserFollowing;
 import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.UserFollowCount;
 import stark.stellasearch.dto.results.UserFollowingInfo;
 import stark.stellasearch.service.dto.User;
 
@@ -20,6 +22,7 @@ import java.util.List;
 @Slf4j
 @Service
 @Validated
+@LogArgumentsAndResponse
 public class UserFollowingService
 {
     private static final int FOLLOW_STATUS_FOLLOWING = 1;
@@ -137,5 +140,12 @@ public class UserFollowingService
             return ServiceResponse.buildSuccessResponse(false);
 
         return ServiceResponse.buildSuccessResponse(true);
+    }
+
+    public ServiceResponse<UserFollowCount> getUserFollowCount()
+    {
+        long userId = UserContextService.getCurrentUser().getId();
+        UserFollowCount userFollowCount = userFollowingMapper.getUserFollowCount(userId);
+        return ServiceResponse.buildSuccessResponse(userFollowCount);
     }
 }

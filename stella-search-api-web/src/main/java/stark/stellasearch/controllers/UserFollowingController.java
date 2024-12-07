@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.UserFollowCount;
 import stark.stellasearch.dto.results.UserFollowingInfo;
 import stark.stellasearch.service.UserFollowingService;
 
@@ -54,5 +55,11 @@ public class UserFollowingController
     public ServiceResponse<Boolean> checkIfFollowing(@ModelAttribute CheckIfFollowingRequest request)
     {
         return userFollowingService.checkIfFollowing(request);
+    }
+
+    @GetMapping("/follow-count")
+    public ServiceResponse<UserFollowCount> getUserFollowCount()
+    {
+        return userFollowingService.getUserFollowCount();
     }
 }

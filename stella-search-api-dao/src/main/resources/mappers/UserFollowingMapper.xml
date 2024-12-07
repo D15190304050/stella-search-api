@@ -12,6 +12,11 @@
         <result column="follow_state" property="followState"/>
     </resultMap>
 
+    <resultMap id="UserFollowCountMap" type="stark.stellasearch.dto.results.UserFollowCount">
+        <result column="following_count" property="followingCount"/>
+        <result column="follower_count" property="followerCount"/>
+    </resultMap>
+
     <insert id="insert">
         INSERT INTO `user_following`
         (
@@ -113,5 +118,13 @@
         FROM `user_following`
         WHERE `user_id` = #{userId}
           AND `followed_user_id` = #{followedUserId}
+    </select>
+    
+    <select id="getUserFollowCount" resultMap="UserFollowCountMap">
+        SELECT SUM(IF(user_id = #{userId}, 1, 0))          AS following_count,
+               SUM(IF(followed_user_id = #{userId}, 1, 0)) AS follower_count
+        FROM user_following
+        WHERE user_id = #{userId}
+           OR followed_user_id = #{userId}
     </select>
 </mapper>
