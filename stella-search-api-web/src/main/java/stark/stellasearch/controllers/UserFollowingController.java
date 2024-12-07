@@ -51,8 +51,8 @@ public class UserFollowingController
     }
 
     @GetMapping("/if-following")
-    public ServiceResponse<Boolean> ifFollowing(@ModelAttribute CheckIfFollowingRequest request)
+    public ServiceResponse<Boolean> checkIfFollowing(@ModelAttribute CheckIfFollowingRequest request)
     {
-        return userFollowingService.ifFollowing(request);
+        return userFollowingService.checkIfFollowing(request);
     }
 }

@@ -18,6 +18,6 @@ public interface UserFollowingMapper
     long countFollowingsByUserId(long userId);
     List<UserFollowingInfo> getFollowers(GetUserFollowingListQueryParam queryParam);
     long countFollowersByUserId(long userId);
-    long countByUsernameAndFollowedUsername(@Param("ifFollowingUsername") String ifFollowingUsername, @Param("currentUsername") String currentUsername);
+    long countByUserIdAndFollowedUserId(@Param("currentUserId") long currentUserId, @Param("followedUserId") long followedUserId);
     long countUserFollowingsByUserIds(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
 }

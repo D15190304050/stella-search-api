@@ -101,11 +101,11 @@
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 
-    <select id="countByUsernameAndFollowedUsername" resultType="long">
+    <select id="countByUserIdAndFollowedUserId" resultType="long">
         SELECT COUNT(*)
         FROM `user_following`
-        WHERE `user_id` = (SELECT id FROM `account_base_info` WHERE `username` = #{currentUsername})
-          AND `followed_user_id` = (SELECT id FROM `account_base_info` WHERE username = #{ifFollowingUsername})
+        WHERE `user_id` = #{currentUserId}
+          AND `followed_user_id` = #{followedUserId}
     </select>
 
     <select id="countUserFollowingsByUserIds" resultType="long">
