@@ -14,4 +14,9 @@ public class RedisKeyManager
     {
         return RedisKeyPrefixes.USER + accountId;
     }
+
+    public String getVideoPlayUrlKey(long videoId)
+    {
+        return RedisKeyPrefixes.VIDEO_PLAY_URL + videoId;
+    }
 }

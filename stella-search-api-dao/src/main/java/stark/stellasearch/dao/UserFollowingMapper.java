@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import stark.stellasearch.domain.UserFollowing;
 import stark.stellasearch.dto.params.GetUserFollowingListQueryParam;
+import stark.stellasearch.dto.results.UserFollowCount;
 import stark.stellasearch.dto.results.UserFollowingInfo;
 
 import java.util.List;
@@ -11,12 +12,14 @@ import java.util.List;
 @Mapper
 public interface UserFollowingMapper
 {
-    UserFollowing getByUserIDAndFollowedUserID(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
+    UserFollowing getByUserIdAndFollowedUserId(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
     int insert(UserFollowing userFollowing);
     int deleteByUserIdAndFollowedUserId(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
-    List<UserFollowingInfo> getFollowingList(GetUserFollowingListQueryParam queryParam);
-    long countFollowingUsersByUsername(String username);
-    List<UserFollowingInfo> getFollowerList(GetUserFollowingListQueryParam queryParam);
-    long countFollowersByUsername(String username);
-    int countByUsernameAndFollowedUsername(@Param("ifFollowingUsername") String ifFollowingUsername, @Param("currentUsername") String currentUsername);
+    List<UserFollowingInfo> getFollowings(GetUserFollowingListQueryParam queryParam);
+    long countFollowingsByUserId(long userId);
+    List<UserFollowingInfo> getFollowers(GetUserFollowingListQueryParam queryParam);
+    long countFollowersByUserId(long userId);
+    long countByUserIdAndFollowedUserId(@Param("currentUserId") long currentUserId, @Param("followedUserId") long followedUserId);
+    long countUserFollowingsByUserIds(@Param("userId") long userId, @Param("followedUserId") long followedUserId);
+    UserFollowCount getUserFollowCount(long userId);
 }

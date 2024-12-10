@@ -15,6 +15,12 @@ spring:
             host: localhost
 #            port: 6379
             port: 10079
+    kafka:
+        bootstrap-servers: localhost:29092,localhost:39092,localhost:49092
+        consumer:
+            bootstrap-servers: localhost:29092,localhost:39092,localhost:49092
+    elasticsearch:
+        uris: http://localhost:9200 # URI of Elasticsearch.
 
 dataworks:
     easy-minio:
@@ -24,6 +30,8 @@ dataworks:
         secret-key: minioadmin
         bucket-name-images: stella-images
         bucket-name-videos: stella-videos
+        bucket-name-video-subtitles: stella-video-subtitles
+        bucket-name-summaries: stella-video-summaries
 
 images:
     avatar-url-prefix: http://localhost:${server.port}/avatar/
@@ -35,3 +43,6 @@ stella-search:
 logging:
     level:
         stark.stellasearch.dao: DEBUG
+
+doubao:
+    model-endpoint: ep-20240917215653-hmx7x

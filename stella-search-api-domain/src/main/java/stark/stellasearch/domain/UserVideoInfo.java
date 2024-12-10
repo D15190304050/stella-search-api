@@ -44,4 +44,9 @@ public class UserVideoInfo extends DomainBase
      * Introduction to the video.
      */
     private String introduction;
+
+    /**
+     * Path of the summary file of the video.
+     */
+    private String summaryFilePath;
 }

@@ -18,17 +18,23 @@ import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.*;
 import stark.stellasearch.domain.UserVideoLike;
+import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.VideoPlayRecord;
 import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.TopicSummaryVideoStartMessage;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
+import stark.stellasearch.service.kafka.ProducerService;
 
 import jakarta.validation.Valid;
+import stark.stellasearch.service.redis.RedisKeyManager;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -46,6 +52,9 @@ public class VideoService
 
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
+
+    @Value("${spring.kafka.producer.topic-summary-video-start}")
+    private String topicSummaryVideoStart;
 
     @Autowired
     private RedisQuickOperation redisQuickOperation;
@@ -65,12 +74,17 @@ public class VideoService
 
     @Autowired
     private VideoPlayRecordMapper videoPlayRecordMapper;
+    @Autowired
+    private ProducerService producerService;
 
     @Autowired
     private UserVideoPlaylistMapper userVideoPlaylistMapper;
 
     @Autowired
     private UserVideoFavoritesMapper userVideoFavoritesMapper;
+
+    @Autowired
+    private RedisKeyManager redisKeyManager;
 
     private String generateTaskId(long userId)
     {
@@ -278,28 +292,49 @@ public class VideoService
             try
             {
                 easyMinio.deleteObjects(bucketNameVideos, sortedChunkNames);
-            } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
-                     NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
-                     InternalException e)
+            }
+            catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                   NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
+                   InternalException e)
             {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request)
+    public ServiceResponse<Boolean> setVideoInfo(@Valid VideoInfoFormData request) throws ExecutionException, InterruptedException
     {
+        long videoId = request.getVideoId();
         OutValue<UserVideoInfo> userVideoInfoOutValue = new OutValue<>();
 
         String errorMessage = validateVideoLabels(request.getLabels());
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-2, errorMessage);
 
-        errorMessage = validateVideoInfoForInitialization(request.getVideoId(), userVideoInfoOutValue);
+        errorMessage = validateVideoInfoForInitialization(videoId, userVideoInfoOutValue);
         if (errorMessage != null)
             return ServiceResponse.buildErrorResponse(-2, errorMessage);
 
-        return updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
+        ServiceResponse<Boolean> updatedVideoInfoResponse = updateVideoInfoResponse(request, userVideoInfoOutValue.getValue());
+        if (!updatedVideoInfoResponse.isSuccess())
+            return updatedVideoInfoResponse;
+
+        UserVideoInfo userVideoInfo = userVideoInfoMapper.getVideoBaseInfoById(videoId);
+        if (userVideoInfo == null)
+            return ServiceResponse.buildErrorResponse(-2, "Invalid video ID: " + videoId);
+
+        sendSummaryStartMessage(videoId, userVideoInfo.getNameInOss());
+
+        return ServiceResponse.buildSuccessResponse(true);
+    }
+
+    private void sendSummaryStartMessage(long videoId, String videoName) throws ExecutionException, InterruptedException
+    {
+        TopicSummaryVideoStartMessage message = new TopicSummaryVideoStartMessage();
+        message.setVideoId(videoId);
+        message.setVideoObjectName(videoName);
+        String messageContent = JsonSerializer.serialize(message);
+        producerService.sendMessage(topicSummaryVideoStart, messageContent);
     }
 
     private ServiceResponse<Boolean> updateVideoInfoResponse(VideoInfoFormData request, UserVideoInfo userVideoInfo)
@@ -486,7 +521,16 @@ public class VideoService
         if (videoPlayInfo == null)
             return ServiceResponse.buildErrorResponse(-7, "Invalid video ID: " + videoId);
 
-        String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
+        String videoPlayUrlKey = redisKeyManager.getVideoPlayUrlKey(videoId);
+        String videoPlayUrl = redisQuickOperation.get(videoPlayUrlKey);
+
+        // TODO: We may need a distributed lock here to prevent concurrent query of same object urls.
+        if (videoPlayUrl == null)
+        {
+            videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
+            redisQuickOperation.set(videoPlayUrlKey, videoPlayUrl, 5, TimeUnit.MINUTES);
+        }
+
         videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
 
         String errorMessage = saveVideoPlayRecord(videoPlayInfo);
@@ -570,34 +614,6 @@ public class VideoService
             return "Insert record to table of video play count failed";
 
         return null;
-    }
-
-    public ServiceResponse<PaginatedData<VideoPlayInfo>> searchVideo(@Valid SearchVideoRequest request) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
-        String keyword = request.getKeyword();
-        long videoCountByKeyword = userVideoInfoMapper.countVideoByKeyword(keyword);
-        if (videoCountByKeyword == 0)
-            return ServiceResponse.buildSuccessResponse(new PaginatedData<>());
-
-        GetVideoInfosByKeywordQueryParam queryParam = new GetVideoInfosByKeywordQueryParam();
-        queryParam.setKeyword(keyword);
-        queryParam.setPaginationParam(request);
-
-        List<VideoPlayInfo> videoPlayInfos = userVideoInfoMapper.getVideoPlayInfosByKeyword(queryParam);
-        for (VideoPlayInfo videoPlayInfo : videoPlayInfos)
-        {
-            String videoPlayUrl = easyMinio.getObjectUrl(bucketNameVideos, videoPlayInfo.getNameInOss());
-            videoPlayInfo.setVideoPlayUrl(videoPlayUrl);
-        }
-
-        PaginatedData<VideoPlayInfo> paginatedData = new PaginatedData<>();
-        paginatedData.setData(videoPlayInfos);
-        paginatedData.setTotal(videoCountByKeyword);
-
-        ServiceResponse<PaginatedData<VideoPlayInfo>> response = ServiceResponse.buildSuccessResponse(paginatedData);
-        response.putExtra("size", videoPlayInfos.size());
-
-        return response;
     }
 
     // TODO: Add visible options for playlists belonging to others.

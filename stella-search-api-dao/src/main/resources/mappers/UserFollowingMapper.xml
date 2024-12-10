@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="stark.stellasearch.dao.UserFollowingMapper">
+    <resultMap id="UserFollowingInfoListMap" type="stark.stellasearch.dto.results.UserFollowingInfo">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="following_time" property="followingTime"/>
+        <result column="following_count" property="followingCount"/>
+        <result column="follower_count" property="followerCount"/>
+        <result column="follow_state" property="followState"/>
+    </resultMap>
+
+    <resultMap id="UserFollowCountMap" type="stark.stellasearch.dto.results.UserFollowCount">
+        <result column="following_count" property="followingCount"/>
+        <result column="follower_count" property="followerCount"/>
+    </resultMap>
+
     <insert id="insert">
         INSERT INTO `user_following`
-        (`user_id`,
-         `followed_user_id`,
-         `following_status`,
-         `creator_id`,
-         `creation_time`,
-         `modifier_id`,
-         `modification_time`)
-        VALUES (#{userId},
-                #{followedUserId},
-                #{followingStatus},
-                #{creatorId},
-                #{creationTime},
-                #{modifierId},
-                #{modificationTime})
+        (
+            `user_id`,
+            `followed_user_id`,
+            `following_status`,
+            `creator_id`,
+            `modifier_id`
+        )
+        VALUES
+        (
+            #{userId},
+            #{followedUserId},
+            #{followingStatus},
+            #{creatorId},
+            #{modifierId}
+        )
     </insert>
 
     <delete id="deleteByUserIdAndFollowedUserId">
@@ -26,7 +43,7 @@
           AND `followed_user_id` = #{followedUserId}
     </delete>
 
-    <select id="getByUserIDAndFollowedUserID" resultType="stark.stellasearch.domain.UserFollowing">
+    <select id="getByUserIdAndFollowedUserId" resultType="stark.stellasearch.domain.UserFollowing">
         SELECT `id`,
                `user_id`,
                `followed_user_id`,
@@ -40,64 +57,76 @@
           AND `followed_user_id` = #{followedUserId}
     </select>
 
-    <resultMap id="UserFollowingInfoListMap" type="stark.stellasearch.dto.results.UserFollowingInfo">
-        <id column="user_id" property="userId"/>
-        <result column="username" property="username"/>
-        <result column="nickname" property="nickname"/>
-        <result column="avatar_url" property="avatarUrl"/>
-        <result column="following_time" property="followingTime"/>
-        <result column="following_count" property="followingCount"/>
-        <result column="follower_count" property="followerCount"/>
-    </resultMap>
-
-    <select id="getFollowingList" resultMap="UserFollowingInfoListMap">
+    <select id="getFollowings" resultMap="UserFollowingInfoListMap">
         SELECT abi.`id`                                                                    AS `user_id`,
                abi.`username`                                                              AS `username`,
                abi.`nickname`                                                              AS `nickname`,
                abi.`avatar_url`                                                            AS `avatar_url`,
-               uf.`creation_time`                                                          AS 'following_time',
-               (SELECT count(*) FROM `user_following` WHERE `user_id` = abi.`id`)          AS `following_count`,
-               (SELECT count(*) FROM `user_following` WHERE `followed_user_id` = abi.`id`) AS `follower_count`
-        FROM `user_following` uf
+               uf.`creation_time`                                                          AS `following_time`,
+               (SELECT COUNT(*) FROM `user_following` WHERE `user_id` = abi.`id`)          AS `following_count`,
+               (SELECT COUNT(*) FROM `user_following` WHERE `followed_user_id` = abi.`id`) AS `follower_count`
+        FROM (SELECT * FROM `user_following` WHERE user_id = #{userId}) uf
         INNER JOIN `account_base_info` abi
         ON abi.`id` = uf.`followed_user_id`
-        AND uf.`user_id` = (SELECT `id` FROM `account_base_info` WHERE `username` = 'GLL_1')
+        ORDER BY `following_time` DESC
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 
-    <select id="countFollowingUsersByUsername" resultType="java.lang.Long">
+    <select id="countFollowingsByUserId" resultType="long">
         SELECT count(*)
         FROM `user_following`
-        WHERE `user_id` =
-              (SELECT `id` FROM `account_base_info` WHERE `username` = #{username})
+        WHERE `user_id` = #{userId}
     </select>
 
-    <select id="countFollowersByUsername" resultType="java.lang.Long">
+    <select id="countFollowersByUserId" resultType="long">
         SELECT count(*)
         FROM `user_following`
-        WHERE `followed_user_id` =
-              (SELECT `id` FROM `account_base_info` WHERE `username` = #{username})
+        WHERE `followed_user_id` = #{userId}
     </select>
 
-    <select id="getFollowerList" resultMap="UserFollowingInfoListMap">
+    <select id="getFollowers" resultMap="UserFollowingInfoListMap">
         SELECT abi.`id`                                                                    AS `user_id`,
                abi.`username`                                                              AS `username`,
                abi.`nickname`                                                              AS `nickname`,
                abi.`avatar_url`                                                            AS `avatar_url`,
-               uf.`creation_time`                                                          AS 'following_time',
-               (SELECT count(*) FROM `user_following` WHERE `user_id` = abi.`id`)          AS `following_count`,
-               (SELECT count(*) FROM `user_following` WHERE `followed_user_id` = abi.`id`) AS `follower_count`
-        FROM `user_following` uf
+               uf.`creation_time`                                                          AS `following_time`,
+               (SELECT COUNT(*) FROM `user_following` WHERE `user_id` = abi.`id`)          AS `following_count`,
+               (SELECT COUNT(*) FROM `user_following` WHERE `followed_user_id` = abi.`id`) AS `follower_count`,
+               (SELECT COUNT(*) = 1
+                FROM `user_following`
+                WHERE `user_id` = #{userId}
+                  AND `followed_user_id` = abi.`id`)                                       AS follow_state
+        FROM
+        (
+            SELECT *
+            FROM `user_following`
+            WHERE `followed_user_id` = #{userId}
+        ) uf
         INNER JOIN `account_base_info` abi
         ON abi.`id` = uf.`user_id`
-        AND uf.`followed_user_id` = (SELECT `id` FROM `account_base_info` WHERE `username` = #{username})
+        ORDER BY `following_time` DESC
         LIMIT #{pageCapacity} OFFSET #{offset}
     </select>
 
-    <select id="countByUsernameAndFollowedUsername" resultType="java.lang.Integer">
+    <select id="countByUserIdAndFollowedUserId" resultType="long">
         SELECT COUNT(*)
+        FROM `user_following`
+        WHERE `user_id` = #{currentUserId}
+          AND `followed_user_id` = #{followedUserId}
+    </select>
+
+    <select id="countUserFollowingsByUserIds" resultType="long">
+        SELECT COUNT(*)
+        FROM `user_following`
+        WHERE `user_id` = #{userId}
+          AND `followed_user_id` = #{followedUserId}
+    </select>
+    
+    <select id="getUserFollowCount" resultMap="UserFollowCountMap">
+        SELECT SUM(IF(user_id = #{userId}, 1, 0))          AS following_count,
+               SUM(IF(followed_user_id = #{userId}, 1, 0)) AS follower_count
         FROM user_following
-        WHERE user_id = (SELECT id FROM account_base_info WHERE username = #{currentUsername})
-          AND followed_user_id = (SELECT id FROM account_base_info WHERE username = #{ifFollowingUsername})
+        WHERE user_id = #{userId}
+           OR followed_user_id = #{userId}
     </select>
 </mapper>
