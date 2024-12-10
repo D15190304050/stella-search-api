@@ -284,3 +284,21 @@ CREATE TABLE `user_following`
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin
     COMMENT = 'Records of following other users.';
+
+DROP TABLE IF EXISTS `user_blacklist`;
+CREATE TABLE `user_blacklist`
+(
+    `id`                BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'ID of the user blacklist record.',
+    `user_id`           BIGINT   NOT NULL COMMENT 'User ID of the person initiating the block.',
+    `blocked_user_id`   BIGINT   NOT NULL COMMENT 'User ID of the person being blocked.',
+    `creator_id`        BIGINT   NOT NULL COMMENT 'ID of the creator of the record.',
+    `creation_time`     DATETIME NOT NULL DEFAULT NOW() COMMENT 'Creation time of the record.',
+    `modifier_id`       BIGINT   NOT NULL COMMENT 'ID of the user who modifies the record.',
+    `modification_time` DATETIME NOT NULL DEFAULT NOW() COMMENT 'Last modification time of the record.',
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_blocked_user_id` (`blocked_user_id`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin
+    COMMENT = 'Records of user blacklist info.';
