@@ -39,4 +39,17 @@
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>stark.coderaider</groupId>
+                <artifactId>fluent-schema-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <configuration>
+                    <entityPackage>stark.stellasearch.domain</entityPackage>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
