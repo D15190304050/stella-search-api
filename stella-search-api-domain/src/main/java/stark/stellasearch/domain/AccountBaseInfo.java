@@ -3,6 +3,8 @@ package stark.stellasearch.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import stark.coderaider.fluentschema.commons.annotations.AutoIncrement;
+import stark.coderaider.fluentschema.commons.annotations.PrimaryKey;
 
 import java.util.Date;
 
@@ -11,6 +13,8 @@ import java.util.Date;
 @Data
 public class AccountBaseInfo
 {
+    @PrimaryKey
+    @AutoIncrement
     private long id;
     private String phoneNumber;
     private String encryptedPassword;

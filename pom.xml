@@ -105,6 +105,12 @@
             </dependency>
 
             <dependency>
+                <groupId>stark.coderaider</groupId>
+                <artifactId>fluent-schema-commons</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
                 <groupId>stark.dataworks</groupId>
                 <artifactId>web-commons</artifactId>
                 <version>${dataworks.version}</version>
@@ -117,4 +123,20 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>stark.coderaider</groupId>
+                <artifactId>fluent-schema-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <entityPackage>stark.stellasearch.domain</entityPackage>
+                    <schemaPackage>stark.stellasearch.schemas</schemaPackage>
+                    <domainModuleName>stella-search-api-domain</domainModuleName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

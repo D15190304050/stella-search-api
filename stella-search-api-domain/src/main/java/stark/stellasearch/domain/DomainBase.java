@@ -1,6 +1,8 @@
 package stark.stellasearch.domain;
 
 import lombok.Data;
+import stark.coderaider.fluentschema.commons.annotations.AutoIncrement;
+import stark.coderaider.fluentschema.commons.annotations.PrimaryKey;
 
 import java.util.Date;
 
@@ -10,6 +12,8 @@ public abstract class DomainBase
     /**
      * ID of the record.
      */
+    @PrimaryKey
+    @AutoIncrement
     private long id;
 
     /**
