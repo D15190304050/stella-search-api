@@ -568,7 +568,13 @@
 
     <update id="setVideoSummaryFileNameById">
         UPDATE `user_video_info`
-        SET summary_file_name = #{summaryFileName}
+        SET `summary_file_name` = #{summaryFileName}
         WHERE `id` = #{id}
     </update>
+
+    <select id="getVideoSummaryFileNameById" resultType="string">
+        SELECT `summary_file_name`
+        FROM `user_video_info`
+        WHERE `id` = #{id}
+    </select>
 </mapper>

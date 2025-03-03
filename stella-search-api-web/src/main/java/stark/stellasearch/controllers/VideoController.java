@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import stark.dataworks.boot.web.PaginatedData;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dto.params.*;
+import stark.stellasearch.dto.results.TranscriptSummary;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.dto.results.VideoUploadingOption;
 import stark.stellasearch.service.ImageService;
@@ -122,5 +123,11 @@ public class VideoController
     public ServiceResponse<PaginatedData<VideoPlayInfo>> getVideoPlayInfoInPlaylist(@ModelAttribute GetVideoPlayInfoInPlaylistRequest request)
     {
         return videoService.getVideoPlayInfoInPlaylist(request);
+    }
+
+    @GetMapping("/summary")
+    public ServiceResponse<TranscriptSummary> getSummaryOfVideo(@RequestParam("videoId") long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    {
+        return videoService.getSummaryOfVideo(videoId);
     }
 }

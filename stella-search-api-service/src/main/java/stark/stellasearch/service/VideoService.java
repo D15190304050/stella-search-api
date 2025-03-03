@@ -21,8 +21,10 @@ import stark.stellasearch.domain.UserVideoLike;
 import stark.stellasearch.dao.VideoPlayRecordMapper;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.VideoPlayRecord;
+import stark.stellasearch.domain.entities.es.VideoSummaryInfo;
 import stark.stellasearch.dto.params.*;
 import stark.stellasearch.dto.results.TopicSummaryVideoStartMessage;
+import stark.stellasearch.dto.results.TranscriptSummary;
 import stark.stellasearch.dto.results.VideoPlayInfo;
 import stark.stellasearch.service.dto.User;
 import stark.stellasearch.service.kafka.ProducerService;
@@ -31,6 +33,8 @@ import jakarta.validation.Valid;
 import stark.stellasearch.service.redis.RedisKeyManager;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -52,6 +56,9 @@ public class VideoService
 
     @Value("${dataworks.easy-minio.bucket-name-videos}")
     private String bucketNameVideos;
+
+    @Value("${dataworks.easy-minio.bucket-name-summaries}")
+    private String bucketNameSummaries;
 
     @Value("${spring.kafka.producer.topic-summary-video-start}")
     private String topicSummaryVideoStart;
@@ -638,5 +645,15 @@ public class VideoService
         paginatedData.setTotal(videoCountInPlaylist);
 
         return ServiceResponse.buildSuccessResponse(paginatedData);
+    }
+
+    public ServiceResponse<TranscriptSummary> getSummaryOfVideo(long videoId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
+    {
+        String videoSummaryFileName = userVideoInfoMapper.getVideoSummaryFileNameById(videoId);
+        if (videoSummaryFileName == null)
+            return ServiceResponse.buildErrorResponse(-1, "There is no related summary for the video.");
+
+        TranscriptSummary summary = easyMinio.getObject(bucketNameSummaries, videoSummaryFileName, TranscriptSummary.class);
+        return ServiceResponse.buildSuccessResponse(summary);
     }
 }

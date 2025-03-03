@@ -25,4 +25,5 @@ public interface UserVideoInfoMapper
     long countVideoByKeyword(String keyword);
     List<VideoPlayInfo> getVideoPlayInfosByPlaylistId(GetVideoPlayInfoInPlaylistQueryParam queryParam);
     long setVideoSummaryFileNameById(@Param("id") long id, @Param("summaryFileName") String summaryFileName);
+    String getVideoSummaryFileNameById(long id);
 }

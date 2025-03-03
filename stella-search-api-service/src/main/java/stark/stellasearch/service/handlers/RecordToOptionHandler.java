@@ -44,7 +44,7 @@ public class RecordToOptionHandler
             if (field.getName().equals(valueProperty))
             {
                 Class<?> valueType = field.getType();
-                if (!valueType.equals(Long.class))
+                if (!valueType.equals(long.class))
                     throw new IllegalArgumentException("\"" + valueProperty + "\" must be long type.");
 
                 valueField = field;
