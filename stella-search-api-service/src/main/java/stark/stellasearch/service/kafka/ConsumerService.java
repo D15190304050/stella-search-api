@@ -12,7 +12,6 @@ import org.springframework.util.StringUtils;
 import stark.dataworks.basic.data.json.JsonSerializer;
 import stark.dataworks.boot.autoconfig.minio.EasyMinio;
 import stark.stellasearch.dao.UserVideoInfoMapper;
-import stark.stellasearch.dao.es.repositories.VideoSummaryInfoRepository;
 import stark.stellasearch.domain.UserVideoInfo;
 import stark.stellasearch.domain.entities.es.VideoSummaryInfo;
 import stark.stellasearch.dto.params.VideoSummaryEndMessage;
@@ -45,9 +44,6 @@ public class ConsumerService
 
     @Autowired
     private UserVideoInfoMapper userVideoInfoMapper;
-
-    @Autowired
-    private VideoSummaryInfoRepository videoSummaryInfoRepository;
 
     @KafkaListener(topics = {"${spring.kafka.consumer.topic-summary-video-end}"},
             groupId = "${spring.kafka.consumer.group-id}",
@@ -102,15 +98,8 @@ public class ConsumerService
 
     private void saveSummary(long videoId, TranscriptSummary transcriptSummary) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
     {
-        saveSummaryToElasticsearch(videoId, transcriptSummary);
         String summaryFileName = saveSummaryToMinio(videoId, transcriptSummary);
         saveSummaryFileNameToDb(videoId, summaryFileName);
-    }
-
-    private void saveSummaryToElasticsearch(long videoId, TranscriptSummary transcriptSummary)
-    {
-        VideoSummaryInfo videoSummaryInfo = toVideoSummaryInfo(videoId, transcriptSummary);
-        videoSummaryInfoRepository.save(videoSummaryInfo);
     }
 
     private VideoSummaryInfo toVideoSummaryInfo(long videoId, TranscriptSummary transcriptSummary)
