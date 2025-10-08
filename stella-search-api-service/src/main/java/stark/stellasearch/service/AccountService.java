@@ -11,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 import stark.dataworks.basic.data.redis.RedisQuickOperation;
 import stark.dataworks.basic.params.OutValue;
 import stark.dataworks.boot.autoconfig.web.LogArgumentsAndResponse;
-import stark.dataworks.boot.web.CommonErrorResponses;
 import stark.dataworks.boot.web.ServiceResponse;
 import stark.stellasearch.dao.AccountBaseInfoMapper;
 import stark.stellasearch.domain.AccountBaseInfo;
@@ -57,7 +56,7 @@ public class AccountService
             return ServiceResponse.buildSuccessResponse(loginState);
         }
 
-        return ServiceResponse.buildErrorResponse(CommonErrorResponses.NOT_LOGIN);
+        return ServiceResponse.buildErrorResponse(-1, "Not login.");
     }
 
     public ServiceResponse<Boolean> register(@Valid RegistrationRequest registrationRequest)
